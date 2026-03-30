@@ -265,6 +265,27 @@
                 <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
             </div>
 
+
+            <!-- TELA DE SELEÇÃO DE ATAQUES -->
+            <div id="move-selection" class="hidden flex-1 flex flex-col p-5 overflow-y-auto">
+                <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Selecionar Ataques</h3>
+                <p class="text-slate-400 text-sm text-center mb-4">Selecione até 4 ataques para <span id="move-selection-poke-name" class="font-bold text-white capitalize"></span>.</p>
+
+                <div id="loading-moves" class="hidden flex-col items-center justify-center py-4">
+                    <div class="spinner mb-2 border-amber-500 border-l-white"></div>
+                    <p class="text-amber-400 text-sm">A procurar registos de ataques...</p>
+                </div>
+
+                <div id="moves-selection-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-6">
+                    <!-- Checkboxes will be injected here -->
+                </div>
+
+                <div class="flex gap-2 mt-auto">
+                    <button id="btn-cancel-moves" onclick="cancelMoveSelection()" class="w-1/3 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 rounded-lg transition-all shadow-md">Cancelar</button>
+                    <button id="btn-confirm-moves" onclick="confirmMoves()" class="w-2/3 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-all shadow-[0_0_15px_rgba(34,197,94,0.5)]">Confirmar Seleção</button>
+                </div>
+            </div>
+
             <!-- TELA DE ARENA -->
             <div id="battle-arena" class="hidden flex-1 flex-col relative overflow-hidden bg-slate-950">
                 <!-- Fundo Épico Dimensional Parallax Arena -->
@@ -628,16 +649,106 @@
 
         function renderSearch(list) {
             document.getElementById('search-results').innerHTML = list.map(p => `
-                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="addToTeam('${p.name}', '${p.url}')">
+                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="openMoveSelection(\'${p.name}\', \'${p.url}\')">
                     <span class="capitalize text-sm font-bold text-slate-200">${p.name}</span><span class="text-xs text-amber-500 font-bold">+</span>
                 </div>
             `).join('');
         }
 
-        async function addToTeam(name, url) {
+
+        let pendingPokeName = "";
+        let pendingPokeUrl = "";
+        let fetchedMovesCache = [];
+
+        async function openMoveSelection(name, url) {
+            if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
+
+            pendingPokeName = name;
+            pendingPokeUrl = url;
+
+            document.getElementById('battle-selection').classList.add('hidden');
+            document.getElementById('move-selection').classList.remove('hidden');
+            document.getElementById('move-selection').classList.add('flex');
+
+            document.getElementById('move-selection-poke-name').innerText = getDisplayName(name);
+            document.getElementById('moves-selection-list').innerHTML = '';
+            document.getElementById('loading-moves').classList.remove('hidden');
+            document.getElementById('loading-moves').classList.add('flex');
+            document.getElementById('btn-confirm-moves').disabled = true;
+
+            try {
+                const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+                const d = await r.json();
+
+                // Extrai url dos moves
+                fetchedMovesCache = d.moves.map(m => ({
+                    name: m.move.name,
+                    url: m.move.url
+                })).sort((a,b) => a.name.localeCompare(b.name));
+
+                renderMovesList();
+            } catch (e) {
+                console.error("Erro a carregar ataques:", e);
+                cancelMoveSelection();
+            } finally {
+                document.getElementById('loading-moves').classList.add('hidden');
+                document.getElementById('loading-moves').classList.remove('flex');
+                document.getElementById('btn-confirm-moves').disabled = false;
+            }
+        }
+
+        function renderMovesList() {
+            const listContainer = document.getElementById('moves-selection-list');
+            listContainer.innerHTML = fetchedMovesCache.map((m, idx) => `
+                <label class="flex items-center gap-2 p-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded cursor-pointer transition-colors">
+                    <input type="checkbox" name="poke-move-check" value="${idx}" class="w-4 h-4 text-amber-500 bg-slate-900 border-slate-600 focus:ring-amber-500 cursor-pointer" onchange="limitMoveSelection(this)">
+                    <span class="text-sm font-bold text-slate-200 capitalize">${m.name.replace('-', ' ')}</span>
+                </label>
+            `).join('');
+        }
+
+        function limitMoveSelection(checkbox) {
+            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
+            if (checkboxes.length > 4) {
+                checkbox.checked = false; // undo
+            }
+        }
+
+        function cancelMoveSelection() {
+            document.getElementById('move-selection').classList.add('hidden');
+            document.getElementById('move-selection').classList.remove('flex');
+            document.getElementById('battle-selection').classList.remove('hidden');
+            pendingPokeName = "";
+            pendingPokeUrl = "";
+            fetchedMovesCache = [];
+        }
+
+
+        async function confirmMoves() {
+            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Selecione pelo menos 1 ataque!");
+                return;
+            }
+
+            const selectedMoveUrls = Array.from(checkboxes).map(cb => fetchedMovesCache[cb.value].url);
+
+            // hide ui back to battle-selection
+            document.getElementById('move-selection').classList.add('hidden');
+            document.getElementById('move-selection').classList.remove('flex');
+            document.getElementById('battle-selection').classList.remove('hidden');
+
+            await addToTeam(pendingPokeName, pendingPokeUrl, selectedMoveUrls);
+
+            pendingPokeName = "";
+            pendingPokeUrl = "";
+            fetchedMovesCache = [];
+        }
+
+        async function addToTeam(name, url, selectedMoves = null) {
             if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
             const id = url.split('/').filter(Boolean).pop();
-            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` });
+            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, selectedMoves });
             renderTeamSlots();
         }
 
@@ -659,7 +770,7 @@
             else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Selecionar 3 para Iniciar"; }
         }
 
-        async function buildFighter(name, level, isEnemy) {
+        async function buildFighter(name, level, isEnemy, chosenMoves = null) {
             const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`); const d = await r.json();
             const getStat = (n) => d.stats.find(s=>s.stat.name===n).base_stat;
             const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
@@ -667,12 +778,24 @@
             const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
             const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
 
-            const mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
+            let mList = [];
+            if (chosenMoves && chosenMoves.length > 0) {
+                mList = chosenMoves;
+            } else {
+                mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
+            }
+
             let fMoves = [];
             for(let url of mList) {
                 if(fMoves.length === 4) break; 
                 const mr = await fetch(url); const md = await mr.json();
-                if(md.power > 0) fMoves.push({ name: md.name, power: md.power, type: md.type.name });
+
+                // Allow user chosen moves even if status moves (fallback to 40 power)
+                if (chosenMoves && chosenMoves.length > 0) {
+                     fMoves.push({ name: md.name, power: md.power > 0 ? md.power : 40, type: md.type.name });
+                } else if(md.power > 0) {
+                     fMoves.push({ name: md.name, power: md.power, type: md.type.name });
+                }
             }
             if(fMoves.length === 0) fMoves.push({name: "Struggle", power: 50, type: "normal"});
 
@@ -695,9 +818,9 @@
 
             try {
                 const enemy = await buildFighter(currentLegendary, 100, true);
-                const p1 = await buildFighter(myTeam[0].name, 65, false);
-                const p2 = await buildFighter(myTeam[1].name, 65, false);
-                const p3 = await buildFighter(myTeam[2].name, 65, false);
+                const p1 = await buildFighter(myTeam[0].name, 65, false, myTeam[0].selectedMoves);
+                const p2 = await buildFighter(myTeam[1].name, 65, false, myTeam[1].selectedMoves);
+                const p3 = await buildFighter(myTeam[2].name, 65, false, myTeam[2].selectedMoves);
                 battleState = { playerTeam: [p1, p2, p3], enemyTeam: [enemy], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
                 updateArenaUI();
