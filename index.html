@@ -570,7 +570,8 @@
 
         const getMultiplier = (atkType, defTypes) => { let m = 1; defTypes.forEach(t => { if(typeMatrix[atkType] && typeMatrix[atkType][t] !== undefined) m *= typeMatrix[atkType][t]; }); return m; };
 
-        let currentLegendary = null; 
+        let currentLegendary = null;
+        let currentChatHistory = [];
         let globalPokedex = []; 
         let legendariesList = Object.keys(extendedLoreDB);
         let myTeam = [];
@@ -666,7 +667,8 @@
                 }
             } catch(e){} finally { document.getElementById('loading-lore').classList.add('hidden'); }
 
-            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-slate-500 my-2 mt-auto">Conexão telepática com o Deus...</div>`;
+            currentChatHistory = [];
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-slate-500 my-2 mt-auto">Conexão telepática com o ${getDisplayName(pokeName).toUpperCase()}...</div>`;
         }
 
         function closeModal() {
@@ -1274,7 +1276,8 @@ checkBattleReady();
                 return;
             }
 
-            const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: [{ role: "user", parts: [{ text: t }] }] };
+            currentChatHistory.push({ role: "user", parts: [{ text: t }] });
+            const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: currentChatHistory };
             const lid = 'l-'+Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`); c.scrollTop = c.scrollHeight;
 
             try {
@@ -1283,6 +1286,7 @@ checkBattleReady();
                 const el = document.getElementById(lid); if (el) el.remove();
                 let msg = "";
                 if (d.error && d.error.message) {
+                    currentChatHistory.pop();
                     msg = "A divindade corta a telepatia com desprezo... [" + d.error.message + "]";
                     // Provide option to change key if there's an API error
                     c.insertAdjacentHTML('beforeend', `
@@ -1297,12 +1301,15 @@ checkBattleReady();
                     `);
                 } else if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0]) {
                     msg = d.candidates[0].content.parts[0].text;
+                    currentChatHistory.push({ role: "model", parts: [{ text: msg }] });
                     c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
                 } else {
+                    currentChatHistory.pop();
                     msg = "A divindade hesita... [Resposta não reconhecida ou vazia do modelo.]";
                     c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
                 }
             } catch(er) {
+                currentChatHistory.pop();
                 console.error("Chat error:", er);
                 const el = document.getElementById(lid); if (el) el.remove();
                 c.insertAdjacentHTML('beforeend', `
