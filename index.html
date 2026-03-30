@@ -76,7 +76,7 @@
         
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; min-height: 0; }
-        .pixelated-img { image-rendering: pixelated; }
+
 
         /* BATALHA UI E ANIMAÇÕES ÉPICAS */
         .health-bar-container { width: 100%; height: 8px; background-color: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #020617; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
@@ -136,6 +136,12 @@
         @keyframes shake { 0%, 100% { transform: translate(0, 0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); } 20%, 40%, 60%, 80% { transform: translate(5px, 0); } }
         @keyframes vfxBurst { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; } }
         
+
+        @keyframes floatBreathe {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.02); }
+        }
+        .anim-breathe { animation: floatBreathe 3s ease-in-out infinite; }
         .anim-lunge-player { animation: lungePlayer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-lunge-enemy { animation: lungeEnemy 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-damage { animation: flashDamage 0.5s ease-out; }
@@ -283,7 +289,7 @@
                         </div>
                         <div class="relative w-36 h-36 absolute right-2 sm:right-8 bottom-0 flex justify-center items-end" id="enemy-img-container">
                             <div class="battle-platform battle-platform-enemy z-0"></div>
-                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
+                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
                             <!-- Balão de Fala Injetado Abaixo do Inimigo -->
                             <div id="enemy-speech-bubble" class="speech-bubble hidden"></div>
                         </div>
@@ -293,7 +299,7 @@
                     <div class="flex justify-start items-end w-full relative h-40">
                         <div class="relative w-40 h-40 absolute left-2 sm:left-8 bottom-0 flex justify-center items-end" id="player-img-container">
                             <div class="battle-platform z-0"></div>
-                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
+                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
                         </div>
                         <div class="rpg-box p-2 w-52 ml-auto mr-2 sm:mr-4 mb-4 z-20">
                             <div class="flex justify-between items-center mb-1"><span id="arena-player-name" class="font-bold text-white capitalize text-sm">Player</span><span class="text-xs text-blue-400 font-bold">Lv65</span></div>
@@ -573,7 +579,7 @@
             const detailImg = document.getElementById('detail-img');
             const gifUrl = data.sprites.other?.showdown?.front_default;
             detailImg.src = gifUrl || data.sprites.front_default;
-            if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
+
 
             document.getElementById('detail-name').innerText = getDisplayName(pokeName);
             document.getElementById('detail-types').innerHTML = data.types.map(t => `<span class="type-badge" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
@@ -647,7 +653,7 @@
             for(let i=0; i<3; i++) {
                 const slot = document.getElementById(`slot-${i}`);
                 if(myTeam[i]) {
-                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain pixelated-img"><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
+                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain "><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
                     slot.classList.replace('border-dashed', 'border-solid'); slot.classList.replace('border-slate-600', 'border-amber-500');
                 } else {
                     slot.innerHTML = `<span class="text-slate-600 font-bold text-xl">+</span>`;
@@ -665,7 +671,7 @@
             const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
             const atk = Math.floor(0.01 * (2 * getStat('attack') + 31) * level) + 5;
             const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
-            const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
+            const sprite = isEnemy ? (d.sprites.other['official-artwork'].front_default || d.sprites.front_default) : (d.sprites.other['official-artwork'].front_default || d.sprites.front_default);
 
             const mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
             let fMoves = [];
@@ -738,13 +744,13 @@
             document.getElementById('arena-enemy-name').innerText = getDisplayName(e.name);
             document.getElementById('arena-enemy-img').src = e.sprite;
             document.getElementById('arena-enemy-img').classList.remove('anim-faint');
-            if(e.sprite.endsWith('.gif')) document.getElementById('arena-enemy-img').classList.add('pixelated-img');
+
             updateHPBar('enemy', e.hpCurrent, e.hpMax);
 
             document.getElementById('arena-player-name').innerText = getDisplayName(p.name);
             document.getElementById('arena-player-img').src = p.sprite;
             document.getElementById('arena-player-img').classList.remove('anim-faint');
-            if(p.sprite.endsWith('.gif')) document.getElementById('arena-player-img').classList.add('pixelated-img');
+
             updateHPBar('player', p.hpCurrent, p.hpMax);
             document.getElementById('arena-player-hp-num').innerText = Math.max(0, p.hpCurrent); document.getElementById('arena-player-hp-max').innerText = p.hpMax;
 
@@ -763,10 +769,11 @@
         function logBattle(t) { document.getElementById('battle-log').innerText = t; }
         const wait = ms => new Promise(r => setTimeout(r, ms));
 
-        function spawnVFX(containerId) {
+        function spawnVFX(containerId, color) {
             const container = document.getElementById(containerId);
             const vfx = document.createElement('div');
             vfx.className = 'vfx-impact';
+            if(color) vfx.style.background = `radial-gradient(circle, #fff 0%, ${color} 40%, transparent 80%)`;
             container.appendChild(vfx);
             setTimeout(() => vfx.remove(), 500);
         }
@@ -817,7 +824,7 @@
             await wait(250);
 
             // Animação de Impacto (Tremer, Flash Vermelho e Explosão Visual)
-            spawnVFX(containerId);
+            spawnVFX(containerId, typeColors[m.type]);
             const img = document.getElementById(targetImgId); 
             img.classList.add('anim-shake', 'anim-damage'); 
             setTimeout(() => img.classList.remove('anim-shake', 'anim-damage'), 500);
@@ -866,7 +873,7 @@
             sc.innerHTML = battleState.playerTeam.map((pk, i) => {
                 const alive = pk.hpCurrent > 0; const isCur = i === battleState.activePlayerIdx;
                 return `<div class="flex flex-col items-center p-2 rounded-lg border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
-                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 pixelated-img"><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
+                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 "><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
             }).join('');
             
             // Esconde o botão de voltar se a troca for obrigatória
