@@ -268,8 +268,8 @@
                     <div class="spinner mb-4 w-8 h-8 border-2"></div>
                     <span class="text-slate-400 text-sm">A ler pergaminhos de batalha...</span>
                 </div>
-                <div id="move-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6 pb-20"></div>
-                <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/90 border-t border-slate-700 backdrop-blur-md z-10">
+                <div id="move-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6"></div>
+                <div class="mt-auto p-4 bg-slate-800 border-t border-slate-700 rounded-lg shadow-lg">
                     <button id="btn-confirm-moves" onclick="confirmMoveSelection()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-lg opacity-50 cursor-not-allowed transition-all shadow-lg" disabled>Confirmar Escolha</button>
                 </div>
             </div>
@@ -902,7 +902,7 @@
             document.getElementById('move-selection-count').innerText = `${selectedMoves.length} / 4 Selecionados`;
 
             const btn = document.getElementById('btn-confirm-moves');
-            if (selectedMoves.length === 4) {
+            if (selectedMoves.length === Math.min(4, currentAvailableMoves.length)) {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
