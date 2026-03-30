@@ -295,8 +295,8 @@
                         </div>
                     </div>
 
-                <div id="team-slots" class="flex flex-wrap justify-center gap-4 mb-6"></div>
-                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar 3 para Iniciar</button>
+                <div id="team-slots" class="grid grid-cols-3 gap-3 mb-6 max-w-[280px] sm:max-w-[320px] mx-auto justify-items-center"></div>
+                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar Equipa</button>
                 <input type="text" id="poke-search" placeholder="Pesquisar Pokémon Comum..." class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-2 mb-4 focus:border-amber-500 outline-none" oninput="filterSearch()">
                 <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
             </div>
@@ -365,7 +365,7 @@
                         </div>
                         
                         <!-- TELA DE TROCA -->
-                        <div id="switch-controls" class="absolute inset-0 hidden flex items-center justify-around p-2 pt-0 h-full"></div>
+                        <div id="switch-controls" class="absolute inset-0 hidden flex flex-wrap items-center justify-center gap-2 p-2 pt-0 h-full overflow-y-auto"></div>
 
                         <!-- CONTROLES DE FIM -->
                         <div id="end-controls" class="absolute inset-0 hidden flex-col sm:flex-row items-center justify-center p-2 gap-2 h-full">
@@ -574,6 +574,10 @@
         }
 
         async function init() {
+            legendariesList = [];
+            hierarchyTiers.forEach(tier => {
+                tier.pokemon.forEach(p => legendariesList.push(p));
+            });
             const container = document.getElementById('pyramid-content');
             hierarchyTiers.forEach(tier => {
                 const div = document.createElement('div'); div.className = 'w-full mb-8';
@@ -961,8 +965,8 @@ checkBattleReady();
             if(!sc) return;
             sc.innerHTML = battleState.playerTeam.map((pk, i) => {
                 const alive = pk.hpCurrent > 0; const isCur = i === battleState.activePlayerIdx;
-                return `<div class="flex flex-col items-center p-2 rounded-lg border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
-                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 pixelated-img"><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
+                return `<div class="flex flex-col items-center p-1 rounded border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
+                        <img src="${pk.sprite}" class="w-8 h-8 sm:w-10 sm:h-10 pixelated-img"><div class="w-12 h-1 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
             }).join('');
             
             // Esconde o botão de voltar se a troca for obrigatória
