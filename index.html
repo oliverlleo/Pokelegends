@@ -203,13 +203,13 @@
     <aside id="details-drawer" class="fixed top-0 right-0 h-full max-h-[100dvh] w-full sm:w-[500px] md:w-[600px] border-l border-slate-700 shadow-2xl z-50 flex flex-col drawer-closed transition-transform duration-300 ease-out bg-slate-900">
         
         <!-- CABEÇALHO LATERAL -->
-        <div id="drawer-header" class="relative w-full flex flex-col items-center justify-center pt-8 pb-2 bg-slate-900 shrink-0 border-b border-slate-800 transition-all">
+        <div id="drawer-header" class="relative w-full flex flex-col items-center justify-center pt-24 pb-2 bg-slate-900 shrink-0 border-b border-slate-800 transition-all">
             <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-500 text-white rounded-full p-2 transition-all duration-200 z-50 focus:outline-none border border-slate-600">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <div class="relative w-full flex justify-center mb-2 animate-divine-float">
+            <div class="relative w-full flex justify-center mb-2 mt-4 animate-divine-float">
                 <div class="absolute inset-0 bg-amber-500/10 blur-[30px] rounded-full w-32 h-32 mx-auto top-1/2 -translate-y-1/2"></div>
-                <img id="detail-img" src="" alt="Pokemon" class="w-32 h-32 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
+                <img id="detail-img" src="" alt="Pokemon" class="w-36 h-36 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
             </div>
             <div class="text-center relative z-10">
                 <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
@@ -580,7 +580,6 @@
         let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
         const translationCache = new Map();
-        const apiKey = "";
 
         function getDisplayName(name) {
             const overrides = { 'giratina-altered': 'Giratina', 'zygarde-50': 'Zygarde', 'ho-oh': 'Ho-Oh', 'tornadus-incarnate': 'Tornadus', 'thundurus-incarnate': 'Thundurus', 'landorus-incarnate': 'Landorus', 'enamorus-incarnate': 'Enamorus', 'type-null': 'Type: Null', 'deoxys-normal': 'Deoxys', 'shaymin-land': 'Shaymin', 'keldeo-ordinary': 'Keldeo', 'meloetta-aria': 'Meloetta', 'urshifu-single-strike': 'Urshifu' };
@@ -1241,13 +1240,42 @@ checkBattleReady();
         }
 
         // ================== CHAT IA TELEPATIA NORMAL ==================
+        function configureApiKey() {
+            const currentKey = localStorage.getItem('geminiApiKey') || '';
+            const newKey = prompt('Insira a sua Chave de Acesso (API Key do Google Gemini):\n\nPara criar uma vá a: https://aistudio.google.com/app/apikey', currentKey);
+            if (newKey !== null) {
+                localStorage.setItem('geminiApiKey', newKey.trim());
+                const c = document.getElementById('chat-messages');
+                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-blue-500/50 text-blue-300 italic">"Conexão restaurada. A mente do Pokémon Lendário volta a abrir-se..."</div>`);
+                c.scrollTop = c.scrollHeight;
+            }
+        }
+
         async function handleChatSubmit(e) {
             e.preventDefault(); const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
             i.value = ''; i.disabled = true;
-            const c = document.getElementById('chat-messages'); c.innerHTML += `<div class="chat-bubble-user">${t}</div>`; c.scrollTop = c.scrollHeight;
             
+            const c = document.getElementById('chat-messages');
+            c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-user">${t}</div>`); c.scrollTop = c.scrollHeight;
+
+            const apiKey = localStorage.getItem('geminiApiKey');
+            if (!apiKey) {
+                const errorHtml = `
+                    <div class="chat-bubble-ai border-red-500/80 flex flex-col gap-2">
+                        <span class="font-bold text-red-400">A conexão telepática falhou...</span>
+                        <span class="text-sm">Para conversar com ${getDisplayName(currentLegendary)}, o Pokedéx necessita de uma Chave de Acesso (API Key do Gemini).</span>
+                        <button onclick="configureApiKey()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-lg py-2 px-3 mt-2 flex items-center justify-center gap-2 transition-colors w-fit text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Configurar Chave API
+                        </button>
+                    </div>`;
+                c.insertAdjacentHTML('beforeend', errorHtml);
+                i.disabled = false; i.focus(); c.scrollTop = c.scrollHeight;
+                return;
+            }
+
             const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: [{ role: "user", parts: [{ text: t }] }] };
-            const lid = 'l-'+Date.now(); c.innerHTML += `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`; c.scrollTop = c.scrollHeight;
+            const lid = 'l-'+Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`); c.scrollTop = c.scrollHeight;
 
             try {
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, { method:'POST', headers: { 'Content-Type': 'application/json' }, body:JSON.stringify(p) });
@@ -1256,16 +1284,37 @@ checkBattleReady();
                 let msg = "";
                 if (d.error && d.error.message) {
                     msg = "A divindade corta a telepatia com desprezo... [" + d.error.message + "]";
+                    // Provide option to change key if there's an API error
+                    c.insertAdjacentHTML('beforeend', `
+                        <div class="chat-bubble-ai border-red-500/80 flex flex-col gap-2">
+                            <span class="font-bold text-red-400">Falha na Conexão</span>
+                            <span class="text-sm">A chave parece estar inválida ou esgotada.</span>
+                            <button onclick="configureApiKey()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-lg py-1 px-3 mt-1 flex items-center justify-center gap-2 transition-colors w-fit text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                Atualizar Chave API
+                            </button>
+                        </div>
+                    `);
                 } else if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0]) {
                     msg = d.candidates[0].content.parts[0].text;
+                    c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
                 } else {
                     msg = "A divindade hesita... [Resposta não reconhecida ou vazia do modelo.]";
+                    c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
                 }
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
             } catch(er) {
                 console.error("Chat error:", er);
                 const el = document.getElementById(lid); if (el) el.remove();
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-red-500">A divindade corta a telepatia com desprezo... [Verifique sua conexão ou chave API]</div>`);
+                c.insertAdjacentHTML('beforeend', `
+                    <div class="chat-bubble-ai border-red-500/80 flex flex-col gap-2">
+                        <span class="font-bold text-red-400">Falha de Rede ou API</span>
+                        <span class="text-sm">Verifique sua conexão ou a Chave de Acesso.</span>
+                        <button onclick="configureApiKey()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-lg py-1 px-3 mt-1 flex items-center justify-center gap-2 transition-colors w-fit text-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Atualizar Chave API
+                        </button>
+                    </div>
+                `);
             }
             finally { i.disabled = false; i.focus(); c.scrollTop = c.scrollHeight; }
         }
