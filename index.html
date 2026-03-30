@@ -238,10 +238,7 @@
         </div>
 
         <!-- ABA CHAT -->
-        <div id="tab-chat" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900 relative">
-            <button onclick="openApiKeyModal()" class="absolute top-2 right-4 text-slate-400 hover:text-amber-400 z-10 bg-slate-800 p-2 rounded-full border border-slate-600 shadow-lg" title="Configurar Chave API">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </button>
+        <div id="tab-chat" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900">
             <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 flex flex-col pb-6"></div>
             <div class="p-4 bg-slate-800 border-t border-slate-700 shrink-0 pb-6 sm:pb-4">
                 <form id="chat-form" class="flex gap-2" onsubmit="handleChatSubmit(event)">
@@ -302,27 +299,6 @@
                 <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar Equipa</button>
                 <input type="text" id="poke-search" placeholder="Pesquisar Pokémon Comum..." class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-2 mb-4 focus:border-amber-500 outline-none" oninput="filterSearch()">
                 <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
-            </div>
-
-
-            <!-- TELA DE SELEÇÃO DE ATAQUES -->
-            <div id="move-selection" class="hidden flex-1 flex flex-col p-5 overflow-y-auto">
-                <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Selecionar Ataques</h3>
-                <p class="text-slate-400 text-sm text-center mb-4">Selecione até 4 ataques para <span id="move-selection-poke-name" class="font-bold text-white capitalize"></span>.</p>
-
-                <div id="loading-moves" class="hidden flex-col items-center justify-center py-4">
-                    <div class="spinner mb-2 border-amber-500 border-l-white"></div>
-                    <p class="text-amber-400 text-sm">A procurar registos de ataques...</p>
-                </div>
-
-                <div id="moves-selection-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-6">
-                    <!-- Checkboxes will be injected here -->
-                </div>
-
-                <div class="flex gap-2 mt-auto">
-                    <button id="btn-cancel-moves" onclick="cancelMoveSelection()" class="w-1/3 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 rounded-lg transition-all shadow-md">Cancelar</button>
-                    <button id="btn-confirm-moves" onclick="confirmMoves()" class="w-2/3 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-all shadow-[0_0_15px_rgba(34,197,94,0.5)]">Confirmar Seleção</button>
-                </div>
             </div>
 
             <!-- TELA DE ARENA -->
@@ -406,25 +382,6 @@
             </div>
         </div>
     </aside>
-
-    <!-- MODAL API KEY -->
-    <div id="api-key-modal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl max-w-md w-full relative transform transition-all">
-            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl text-amber-500 font-bold mb-4 title-font">Configuração Telepática</h2>
-            <p class="text-slate-300 mb-4 text-sm">Para falar com as divindades, você precisa de uma chave da API Gemini do Google Studio.</p>
-            <p class="text-slate-400 mb-4 text-xs">
-                1. Acesse <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 hover:underline">Google AI Studio</a><br>
-                2. Crie uma nova API Key<br>
-                3. Cole a chave abaixo
-            </p>
-            <input type="password" id="api-key-input" placeholder="Cole sua API Key aqui (AIzaSy...)" class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:border-amber-500 mb-4">
-            <button onclick="saveApiKey()" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-lg font-bold transition-colors shadow-lg shadow-amber-900/50">Salvar Conexão</button>
-            <p id="api-key-success" class="hidden text-green-400 text-xs text-center mt-3">Conexão estabelecida com sucesso!</p>
-        </div>
-    </div>
 
     <script>
         // --- PARALLAX JAVASCRIPT ---
@@ -600,7 +557,7 @@
         let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
         const translationCache = new Map();
-        let apiKey = localStorage.getItem("geminiApiKey") || "";
+        const apiKey = "";
 
         function getDisplayName(name) {
             const overrides = { 'giratina-altered': 'Giratina', 'zygarde-50': 'Zygarde', 'ho-oh': 'Ho-Oh', 'tornadus-incarnate': 'Tornadus', 'thundurus-incarnate': 'Thundurus', 'landorus-incarnate': 'Landorus', 'enamorus-incarnate': 'Enamorus', 'type-null': 'Type: Null', 'deoxys-normal': 'Deoxys', 'shaymin-land': 'Shaymin', 'keldeo-ordinary': 'Keldeo', 'meloetta-aria': 'Meloetta', 'urshifu-single-strike': 'Urshifu' };
@@ -616,30 +573,10 @@
             } catch (e) { return text; }
         }
 
-        // ================== CONFIGURAÇÃO API ==================
-        function openApiKeyModal() {
-            const input = document.getElementById('api-key-input');
-            input.value = apiKey; // Show current if any
-            document.getElementById('api-key-modal').classList.remove('hidden');
-            document.getElementById('api-key-success').classList.add('hidden');
-        }
-
-        function closeApiKeyModal() {
-            document.getElementById('api-key-modal').classList.add('hidden');
-        }
-
-        function saveApiKey() {
-            const input = document.getElementById('api-key-input').value.trim();
-            apiKey = input;
-            localStorage.setItem('geminiApiKey', apiKey);
-            document.getElementById('api-key-success').classList.remove('hidden');
-            setTimeout(closeApiKeyModal, 1500);
-        }
-
         async function init() {
             legendariesList = [];
             hierarchyTiers.forEach(tier => {
-                tier.pokemon.forEach(p => legendariesList.push(p));
+                tier.pokemon.forEach(p => legendariesList.push(p.split('-')[0]));
             });
             const container = document.getElementById('pyramid-content');
             hierarchyTiers.forEach(tier => {
@@ -726,11 +663,12 @@
             if (mode === 'rivalry') {
                 maxTeamSize = 1;
             } else {
-                changeDifficulty(currentDifficulty); // Reset to selected difficulty
-                return;
+                changeDifficulty(currentDifficulty);
             }
 
-            if (myTeam.length > maxTeamSize) myTeam = myTeam.slice(0, maxTeamSize);
+            if (myTeam.length > maxTeamSize) {
+                myTeam = myTeam.slice(0, maxTeamSize);
+            }
             renderTeamSlots();
             checkBattleReady();
             filterSearch();
@@ -788,7 +726,7 @@
         async function addToTeam(name, url) {
             if(myTeam.length >= maxTeamSize || myTeam.find(p => p.name === name)) return;
             const id = url.split('/').filter(Boolean).pop();
-            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, selectedMoves });
+            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` });
             renderTeamSlots();
         }
 
@@ -820,7 +758,7 @@
 checkBattleReady();
         }
 
-        async function buildFighter(name, level, isEnemy, chosenMoves = null) {
+        async function buildFighter(name, level, isEnemy) {
             const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`); const d = await r.json();
             const getStat = (n) => d.stats.find(s=>s.stat.name===n).base_stat;
             const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
@@ -828,24 +766,12 @@ checkBattleReady();
             const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
             const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
 
-            let mList = [];
-            if (chosenMoves && chosenMoves.length > 0) {
-                mList = chosenMoves;
-            } else {
-                mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
-            }
-
+            const mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
             let fMoves = [];
             for(let url of mList) {
                 if(fMoves.length === 4) break; 
                 const mr = await fetch(url); const md = await mr.json();
-
-                // Allow user chosen moves even if status moves (fallback to 40 power)
-                if (chosenMoves && chosenMoves.length > 0) {
-                     fMoves.push({ name: md.name, power: md.power > 0 ? md.power : 40, type: md.type.name });
-                } else if(md.power > 0) {
-                     fMoves.push({ name: md.name, power: md.power, type: md.type.name });
-                }
+                if(md.power > 0) fMoves.push({ name: md.name, power: md.power, type: md.type.name });
             }
             if(fMoves.length === 0) fMoves.push({name: "Struggle", power: 50, type: "normal"});
 
@@ -868,10 +794,16 @@ checkBattleReady();
 
             try {
                 const enemy = await buildFighter(currentLegendary, 100, true);
-                const p1 = await buildFighter(myTeam[0].name, 65, false, myTeam[0].selectedMoves);
-                const p2 = await buildFighter(myTeam[1].name, 65, false, myTeam[1].selectedMoves);
-                const p3 = await buildFighter(myTeam[2].name, 65, false, myTeam[2].selectedMoves);
-                battleState = { playerTeam: [p1, p2, p3], enemyTeam: [enemy], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
+                let pLevel = currentDifficulty === 'hard' ? 75 : 65;
+                if (currentGameMode === 'rivalry') pLevel = 100;
+
+                const playerTeam = [];
+                for(let i=0; i<maxTeamSize; i++) {
+                    const p = await buildFighter(myTeam[i].name, pLevel, false);
+                    playerTeam.push(p);
+                }
+
+                battleState = { playerTeam: playerTeam, enemyTeam: [enemy], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
                 updateArenaUI();
                 showMainMenu();
@@ -1103,29 +1035,15 @@ checkBattleReady();
         async function handleChatSubmit(e) {
             e.preventDefault(); const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
             i.value = ''; i.disabled = true;
-            const c = document.getElementById('chat-messages'); c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-user">${t}</div>`); c.scrollTop = c.scrollHeight;
+            const c = document.getElementById('chat-messages'); c.innerHTML += `<div class="chat-bubble-user">${t}</div>`; c.scrollTop = c.scrollHeight;
             
-            if (!apiKey || apiKey.trim() === '') {
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-red-500 font-bold">A conexão falhou...</div>`);
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-slate-600 text-sm text-slate-300">Para se comunicar com as divindades, você precisa fornecer a Chave API.<br><br>1. Clique no <strong>ícone de engrenagem</strong> no canto superior direito do chat.<br>2. Adicione sua chave do Google AI Studio.<br>3. Tente enviar a mensagem novamente.</div>`);
-                i.disabled = false; i.focus(); c.scrollTop = c.scrollHeight;
-                return;
-            }
-
             const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: [{ role: "user", parts: [{ text: t }] }] };
-            const lid = 'l-'+Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`); c.scrollTop = c.scrollHeight;
+            const lid = 'l-'+Date.now(); c.innerHTML += `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`; c.scrollTop = c.scrollHeight;
 
             try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, { method:'POST', headers: { 'Content-Type': 'application/json' }, body:JSON.stringify(p) });
-                const d = await r.json();
-                const el = document.getElementById(lid); if (el) el.remove();
-                let msg = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] ? d.candidates[0].content.parts[0].text : "A divindade hesita... [Erro de comunicação. Verifique se sua chave API é válida.]";
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-amber-600/50">${msg}</div>`);
-            } catch(er) {
-                console.error("Chat error:", er);
-                const el = document.getElementById(lid); if (el) el.remove();
-                c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-red-500">A divindade corta a telepatia com desprezo... [Verifique sua conexão ou chave API]</div>`);
-            }
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, { method:'POST', body:JSON.stringify(p) });
+                const d = await r.json(); document.getElementById(lid).remove(); c.innerHTML += `<div class="chat-bubble-ai border-amber-600/50">${d.candidates[0].content.parts[0].text}</div>`;
+            } catch(er) { document.getElementById(lid).remove(); c.innerHTML += `<div class="chat-bubble-ai border-red-500">A divindade corta a telepatia com desprezo...</div>`; }
             finally { i.disabled = false; i.focus(); c.scrollTop = c.scrollHeight; }
         }
 
