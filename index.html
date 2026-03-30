@@ -636,7 +636,13 @@
             const data = await resp.json();
             
             const detailImg = document.getElementById('detail-img');
-            const gifUrl = data.sprites.other?.showdown?.front_default;
+            let gifUrl = null;
+            if (data.sprites.other?.showdown) {
+                const gifs = Object.values(data.sprites.other.showdown).filter(url => typeof url === 'string' && url.endsWith('.gif'));
+                if (gifs.length > 0) {
+                    gifUrl = gifs[Math.floor(Math.random() * gifs.length)];
+                }
+            }
             detailImg.src = gifUrl || data.sprites.front_default;
             if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
