@@ -1,402 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Hierarquia dos Lendários Pokémon (Pura)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap');
 
-        body {
-            background-color: #020617; color: #e2e8f0; font-family: 'Nunito', sans-serif;
-            overflow-x: hidden; margin: 0; padding: 0;
-        }
-
-        h1, h2, h3, .title-font { font-family: 'Cinzel', serif; }
-        .pixel-font { font-family: 'Press Start 2P', cursive; }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-        /* PARALLAX ESPACIAL (PIRÂMIDE PRINCIPAL) */
-        #parallax-bg {
-            position: fixed; top: -50px; left: -50px; right: -50px; bottom: -50px;
-            z-index: -1; overflow: hidden; pointer-events: none; background-color: #020617;
-        }
-        .layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; will-change: transform; transition: transform 0.3s ease-out; }
-        .nebula { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; mix-blend-mode: screen; animation: pulse 10s infinite alternate ease-in-out; }
-        .nebula-purple { background: rgba(88, 28, 135, 0.4); width: 60vw; height: 60vh; top: -10%; left: -10%; }
-        .nebula-blue { background: rgba(30, 58, 138, 0.3); width: 70vw; height: 70vh; bottom: -10%; right: -10%; animation-delay: -3s; }
-        .nebula-gold { background: rgba(180, 83, 9, 0.2); width: 40vw; height: 40vh; top: 30%; left: 30%; filter: blur(150px); animation-delay: -6s;}
-
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.1); opacity: 0.7; } }
-        @keyframes divineFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
-        .animate-divine-float { animation: divineFloat 4s ease-in-out infinite; }
-
-        .stars-sm { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='10' cy='10' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='150' cy='50' r='0.5' fill='white' opacity='0.2'/%3E%3Ccircle cx='80' cy='180' r='1' fill='white' opacity='0.5'/%3E%3Ccircle cx='190' cy='120' r='1.5' fill='white' opacity='0.3'/%3E%3C/svg%3E") repeat; }
-        .stars-md { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ccircle cx='50' cy='50' r='1.5' fill='white' opacity='0.6'/%3E%3Ccircle cx='200' cy='150' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='100' cy='250' r='2' fill='white' opacity='0.3'/%3E%3C/svg%3E") repeat; }
-        .stars-lg { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='100' cy='100' r='2.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='300' cy='200' r='1.5' fill='white' opacity='0.5'/%3E%3C/svg%3E") repeat; }
-
-        /* PIRÂMIDE E UI GERAL */
-        .pyramid-container { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; padding: 3rem 1rem; max-width: 1400px; margin: 0 auto; }
-        .tier-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; width: 100%; }
-        .poke-node {
-            width: 75px; height: 75px; border-radius: 50%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
-            border: 1px solid rgba(71, 85, 105, 0.5); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
-        }
-        .poke-node:hover { transform: scale(1.15) translateY(-8px); border-color: rgba(251, 191, 36, 0.8); box-shadow: 0 15px 35px rgba(251, 191, 36, 0.2), inset 0 0 20px rgba(251, 191, 36, 0.1); background: rgba(30, 41, 59, 0.8); z-index: 10; }
-        .poke-node.active { border-color: #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.7), inset 0 0 15px rgba(251, 191, 36, 0.3); transform: scale(1.1); background: rgba(30, 41, 59, 0.9); z-index: 10; }
-        .poke-node img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: all 0.3s ease; }
-        
-        .tooltip {
-            position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
-            white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; text-transform: capitalize; z-index: 20; font-weight: 600;
-        }
-        .poke-node:hover .tooltip { opacity: 1; }
-
-        .tier-title { text-align: center; font-size: 1.2rem; color: rgba(251, 191, 36, 0.9); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; width: 100%; text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3); font-weight: 700; }
-        .type-badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: white; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.5); }
-
-        .spinner { border: 3px solid rgba(255, 255, 255, 0.1); border-left-color: #fbbf24; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* MODAL LATERAL */
-        .drawer-open { transform: translateX(0); }
-        .drawer-closed { transform: translateX(100%); }
-        .backdrop-open { opacity: 1; pointer-events: auto; }
-        .backdrop-closed { opacity: 0; pointer-events: none; }
-        
-        .chat-bubble-ai { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px 12px 12px 2px; padding: 10px 14px; color: #f8fafc; max-width: 85%; align-self: flex-start; }
-        .chat-bubble-user { background-color: #3b82f6; color: white; border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 85%; align-self: flex-end; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; flex-direction: column; min-height: 0; }
-
-
-        /* BATALHA UI E ANIMAÇÕES ÉPICAS */
-        .health-bar-container { width: 100%; height: 8px; background-color: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #020617; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .health-bar { height: 100%; background-color: #22c55e; transition: width 0.3s ease, background-color 0.3s ease; }
-        .health-bar.yellow { background-color: #eab308; }
-        .health-bar.red { background-color: #ef4444; }
-        
-        .battle-btn { transition: transform 0.1s, border-color 0.2s; border: 2px solid transparent; }
-        .battle-btn:active { transform: scale(0.95); }
-        .battle-btn:hover { border-color: rgba(255,255,255,0.7); }
-
-        /* CAIXA DE DIÁLOGO RPG */
-        .rpg-box {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 2px solid #94a3b8; border-radius: 8px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
-        }
-
-        /* PARALLAX DA ARENA DE BATALHA */
-        @keyframes warpSpeed { 0% { background-position: 0 0; } 100% { background-position: -500px 1000px; } }
-        @keyframes warpSpeedSlow { 0% { background-position: 0 0; } 100% { background-position: -200px 500px; } }
-        
-        .arena-warp-1 { background: radial-gradient(circle, rgba(99,102,241,0.6) 2px, transparent 2px); background-size: 150px 150px; animation: warpSpeed 8s linear infinite; opacity: 0.5; }
-        .arena-warp-2 { background: radial-gradient(circle, rgba(168,85,247,0.4) 3px, transparent 3px); background-size: 250px 250px; animation: warpSpeedSlow 15s linear infinite; opacity: 0.3; }
-
-        /* NOVA GRELHA 3D DE BATALHA (PARALLAX DO CHÃO) */
-        .battle-grid {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
-            background-image: linear-gradient(rgba(56, 189, 248, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.4) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: perspective(500px) rotateX(65deg);
-            transform-origin: bottom;
-            animation: gridMove 2s linear infinite;
-            border-top: 2px solid rgba(56, 189, 248, 0.8);
-            box-shadow: inset 0 20px 50px rgba(0,0,0,0.8);
-        }
-        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
-
-        /* PLATAFORMAS 3D DE COMBATE */
-        .battle-platform {
-            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) rotateX(75deg);
-            width: 160px; height: 160px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(56,189,248,0.5) 0%, rgba(0,0,0,0) 60%);
-            box-shadow: 0 0 30px rgba(56,189,248,0.3), inset 0 0 30px rgba(56,189,248,0.3);
-        }
-        .battle-platform-enemy { 
-            background: radial-gradient(circle, rgba(239,68,68,0.5) 0%, rgba(0,0,0,0) 60%); 
-            box-shadow: 0 0 30px rgba(239,68,68,0.3), inset 0 0 30px rgba(239,68,68,0.3); 
-        }
-
-        /* VFX DE ATAQUE */
-        @keyframes lungePlayer { 0% {transform: translate(0,0);} 50% {transform: translate(40px, -40px) scale(1.15);} 100% {transform: translate(0,0);} }
-        @keyframes lungeEnemy { 0% {transform: translate(0,0);} 50% {transform: translate(-40px, 40px) scale(1.15);} 100% {transform: translate(0,0);} }
-        @keyframes flashDamage { 0%, 100% {filter: brightness(1);} 50% {filter: brightness(2) drop-shadow(0 0 20px red); opacity: 0.7;} }
-        @keyframes slideInRight { 0% {transform: translateX(150px) scale(0.5); opacity: 0;} 100% {transform: translateX(0) scale(1); opacity: 1;} }
-        @keyframes slideInLeft { 0% {transform: translateX(-150px) scale(0.5); opacity: 0;} 100% {transform: translateX(0) scale(1); opacity: 1;} }
-        @keyframes shake { 0%, 100% { transform: translate(0, 0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); } 20%, 40%, 60%, 80% { transform: translate(5px, 0); } }
-        @keyframes vfxBurst { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; } }
-        
-
-        @keyframes floatBreathe {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(1.02); }
-        }
-        .anim-breathe { animation: floatBreathe 3s ease-in-out infinite; }
-        .anim-lunge-player { animation: lungePlayer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .anim-lunge-enemy { animation: lungeEnemy 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .anim-damage { animation: flashDamage 0.5s ease-out; }
-        .anim-enter-enemy { animation: slideInRight 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .anim-enter-player { animation: slideInLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .anim-shake { animation: shake 0.4s; }
-        .anim-faint { transition: all 0.8s ease; transform: translateY(50px); opacity: 0; filter: grayscale(1); }
-
-        .vfx-impact { 
-            position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
-            background: radial-gradient(circle, #fff 0%, #facc15 40%, transparent 80%); 
-            border-radius: 50%; pointer-events: none; z-index: 30;
-            animation: vfxBurst 0.4s ease-out forwards;
-            mix-blend-mode: color-dodge;
-        }
-
-        /* BALÃO DE FALA (SPEECH BUBBLE) DO LENDÁRIO */
-        .speech-bubble {
-            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95); color: #000;
-            padding: 8px 12px; border-radius: 12px; font-size: 11px; font-weight: 800;
-            text-align: center; width: 200px; z-index: 50;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-            border: 2px solid #cbd5e1;
-            font-family: 'Nunito', sans-serif;
-        }
-        .speech-bubble::before {
-            content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-            border-width: 0 8px 8px 8px; border-style: solid; border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
-        }
-        .bubble-show { opacity: 1; }
-
-    </style>
-</head>
-<body class="h-full min-h-screen w-full relative">
-
-    <!-- FUNDO PARALLAX ESPACIAL PRINCIPAL -->
-    <div id="parallax-bg">
-        <div class="layer" id="layer-nebula" data-speed="0.5">
-            <div class="nebula nebula-purple"></div><div class="nebula nebula-blue"></div><div class="nebula nebula-gold"></div>
-        </div>
-        <div class="layer stars-sm" id="layer-stars-1" data-speed="2"></div>
-        <div class="layer stars-md" id="layer-stars-2" data-speed="4"></div>
-        <div class="layer stars-lg" id="layer-stars-3" data-speed="7"></div>
-    </div>
-
-    <!-- MAIN AREA PIRÂMIDE -->
-    <main class="w-full h-screen overflow-y-auto relative z-10" id="pyramid-area">
-        <div class="text-center pt-10 pb-6 sticky top-0 bg-gradient-to-b from-[#020617] via-[#020617]/90 to-transparent z-20">
-            <h1 class="text-4xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 font-bold mb-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">A Hierarquia Divina</h1>
-            <p class="text-slate-300 text-sm md:text-base font-light tracking-wide px-4">Apenas os verdadeiros Lendários e Míticos sagrados.</p>
-        </div>
-        <div id="loading-main" class="flex flex-col items-center justify-center h-64">
-            <div class="spinner mb-4 w-12 h-12 border-4"></div>
-            <p class="text-amber-400 title-font text-xl tracking-widest">Invocando as Lendas...</p>
-        </div>
-        <div id="pyramid-content" class="pyramid-container hidden pb-24 relative z-10"></div>
-    </main>
-
-    <!-- BACKDROP DO MODAL -->
-    <div id="modal-backdrop" class="fixed inset-0 bg-black/80 z-40 backdrop-blur-sm backdrop-closed transition-opacity duration-300" onclick="closeModal()"></div>
-
-    <!-- MENU LATERAL (DRAWER) -->
-    <aside id="details-drawer" class="fixed top-0 right-0 h-full max-h-[100dvh] w-full sm:w-[500px] md:w-[600px] border-l border-slate-700 shadow-2xl z-50 flex flex-col drawer-closed transition-transform duration-300 ease-out bg-slate-900">
-        
-        <!-- CABEÇALHO LATERAL -->
-        <div id="drawer-header" class="relative w-full flex flex-col items-center justify-center pt-8 pb-2 bg-slate-900 shrink-0 border-b border-slate-800 transition-all">
-            <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-500 text-white rounded-full p-2 transition-all duration-200 z-50 focus:outline-none border border-slate-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            <div class="relative w-full flex justify-center mb-2 animate-divine-float">
-                <div class="absolute inset-0 bg-amber-500/10 blur-[30px] rounded-full w-32 h-32 mx-auto top-1/2 -translate-y-1/2"></div>
-                <img id="detail-img" src="" alt="Pokemon" class="w-32 h-32 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
-            </div>
-            <div class="text-center relative z-10">
-                <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
-                <div id="detail-types" class="flex justify-center gap-2"></div>
-            </div>
-            <div class="flex w-full px-4 mt-4 gap-2 shrink-0">
-                <button onclick="switchTab('lore')" id="tab-btn-lore" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors text-amber-400 border-amber-400">História</button>
-                <button onclick="switchTab('chat')" id="tab-btn-chat" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-amber-200">Telepatia</button>
-                <button onclick="switchTab('battle')" id="tab-btn-battle" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-red-300">Batalha</button>
-            </div>
-        </div>
-
-        <!-- ABA HISTÓRIA -->
-        <div id="tab-lore" class="tab-content active flex-1 overflow-y-auto p-5 pb-32 space-y-6 bg-slate-900">
-            <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-inner relative overflow-hidden shrink-0">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                <h3 class="text-blue-400 text-sm md:text-base mb-2 font-bold uppercase tracking-widest">Registo Oficial</h3>
-                <div id="loading-lore" class="hidden flex items-center gap-3 my-2"><div class="spinner w-5 h-5 border-2"></div><span class="text-slate-400 text-sm">Traduzindo...</span></div>
-                <p id="detail-short-lore" class="text-slate-300 italic text-sm md:text-base font-light"></p>
-            </div>
-            <div class="bg-slate-800/80 rounded-xl p-6 border border-amber-900/50 shadow-lg relative shrink-0">
-                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
-                <h3 class="text-amber-500 text-lg md:text-xl mb-4 title-font font-bold">A Lenda Expandida</h3>
-                <div id="detail-extended-lore" class="text-slate-200 leading-relaxed text-justify text-base font-light space-y-4 h-auto"></div>
-            </div>
-        </div>
-
-        <!-- ABA CHAT -->
-        <div id="tab-chat" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900 relative">
-            <button onclick="openApiKeyModal()" class="absolute top-2 right-4 text-slate-400 hover:text-amber-400 z-10 bg-slate-800 p-2 rounded-full border border-slate-600 shadow-lg" title="Configurar Chave API">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </button>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 flex flex-col pb-6"></div>
-            <div class="p-4 bg-slate-800 border-t border-slate-700 shrink-0 pb-6 sm:pb-4">
-                <form id="chat-form" class="flex gap-2" onsubmit="handleChatSubmit(event)">
-                    <input type="text" id="chat-input" placeholder="Fale com a lenda..." autocomplete="off" class="flex-grow bg-slate-900 text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:border-amber-500">
-                    <button type="submit" id="chat-send-btn" class="bg-amber-600 hover:bg-amber-500 text-white px-5 rounded-lg font-bold transition-colors">Enviar</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ABA BATALHA -->
-        <div id="tab-battle" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900">
-            
-            <!-- TELA DE SELEÇÃO -->
-            <div id="battle-selection" class="flex-1 flex flex-col p-5 overflow-y-auto">
-                <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Monte sua Equipa</h3>
-                <p class="text-slate-400 text-sm text-center mb-4">Selecione 3 Pokémon comuns (Lvl 65) para enfrentar esta Lenda (Lvl 100).</p>
-                <div class="flex justify-center gap-3 mb-6">
-                    <div id="slot-0" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(0)"></div>
-                    <div id="slot-1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(1)"></div>
-                    <div id="slot-2" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(2)"></div>
-                </div>
-                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar 3 para Iniciar</button>
-                <input type="text" id="poke-search" placeholder="Pesquisar Pokémon Comum..." class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-2 mb-4 focus:border-amber-500 outline-none" oninput="filterSearch()">
-                <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
-            </div>
-
-
-            <!-- TELA DE SELEÇÃO DE ATAQUES -->
-            <div id="move-selection" class="hidden flex-1 flex flex-col p-5 overflow-y-auto">
-                <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Selecionar Ataques</h3>
-                <p class="text-slate-400 text-sm text-center mb-4">Selecione até 4 ataques para <span id="move-selection-poke-name" class="font-bold text-white capitalize"></span>.</p>
-
-                <div id="loading-moves" class="hidden flex-col items-center justify-center py-4">
-                    <div class="spinner mb-2 border-amber-500 border-l-white"></div>
-                    <p class="text-amber-400 text-sm">A procurar registos de ataques...</p>
-                </div>
-
-                <div id="moves-selection-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-6">
-                    <!-- Checkboxes will be injected here -->
-                </div>
-
-                <div class="flex gap-2 mt-auto">
-                    <button id="btn-cancel-moves" onclick="cancelMoveSelection()" class="w-1/3 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 rounded-lg transition-all shadow-md">Cancelar</button>
-                    <button id="btn-confirm-moves" onclick="confirmMoves()" class="w-2/3 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-all shadow-[0_0_15px_rgba(34,197,94,0.5)]">Confirmar Seleção</button>
-                </div>
-            </div>
-
-            <!-- TELA DE ARENA -->
-            <div id="battle-arena" class="hidden flex-1 flex-col relative overflow-hidden bg-slate-950">
-                <!-- Fundo Épico Dimensional Parallax Arena -->
-                <div class="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-black z-0"></div>
-                <div class="absolute inset-0 arena-warp-1 z-0"></div>
-                <div class="absolute inset-0 arena-warp-2 z-0"></div>
-                <!-- Nova Grelha 3D -->
-                <div class="battle-grid z-0"></div>
-                
-                <div class="relative flex-1 p-4 flex flex-col justify-between z-10 pt-8">
-                    <!-- INIMIGO -->
-                    <div class="flex justify-end items-end w-full relative h-36">
-                        <div class="rpg-box p-2 w-52 mr-2 sm:mr-4 mb-10 z-20">
-                            <div class="flex justify-between items-center mb-1"><span id="arena-enemy-name" class="font-bold text-white capitalize text-sm">Enemy</span><span class="text-xs text-red-400 font-bold">Lv100</span></div>
-                            <div class="health-bar-container"><div id="arena-enemy-hp" class="health-bar w-full"></div></div>
-                        </div>
-                        <div class="relative w-36 h-36 absolute right-2 sm:right-8 bottom-0 flex justify-center items-end" id="enemy-img-container">
-                            <div class="battle-platform battle-platform-enemy z-0"></div>
-                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
-                            <!-- Balão de Fala Injetado Abaixo do Inimigo -->
-                            <div id="enemy-speech-bubble" class="speech-bubble hidden"></div>
-                        </div>
-                    </div>
-
-                    <!-- JOGADOR -->
-                    <div class="flex justify-start items-end w-full relative h-40">
-                        <div class="relative w-40 h-40 absolute left-2 sm:left-8 bottom-0 flex justify-center items-end" id="player-img-container">
-                            <div class="battle-platform z-0"></div>
-                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
-                        </div>
-                        <div class="rpg-box p-2 w-52 ml-auto mr-2 sm:mr-4 mb-4 z-20">
-                            <div class="flex justify-between items-center mb-1"><span id="arena-player-name" class="font-bold text-white capitalize text-sm">Player</span><span class="text-xs text-blue-400 font-bold">Lv65</span></div>
-                            <div class="health-bar-container"><div id="arena-player-hp" class="health-bar w-full"></div></div>
-                            <div class="text-right text-[10px] font-bold text-slate-300 mt-1"><span id="arena-player-hp-num">0</span> / <span id="arena-player-hp-max">0</span> HP</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CONTROLES ESTILO RPG -->
-                <div class="h-56 sm:h-48 bg-slate-900 border-t-4 border-slate-700 z-20 flex flex-col shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
-                    <div id="battle-log" class="h-16 rpg-box mx-2 mt-2 flex items-center px-4 text-white pixel-font text-[10px] sm:text-[11px] leading-relaxed overflow-y-auto">
-                        A batalha começou!
-                    </div>
-                    
-                    <div class="flex-1 relative p-2">
-                        <!-- MENU PRINCIPAL -->
-                        <div id="main-action-menu" class="absolute inset-0 grid grid-cols-3 gap-2 p-2 pt-0 h-full items-center">
-                            <button class="battle-btn bg-red-700 hover:bg-red-600 rounded-lg text-white font-bold shadow-md h-12" onclick="showFightMenu()">Lutar</button>
-                            <button class="battle-btn bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-bold shadow-md h-12" onclick="showSwitchUI()">Pokémon</button>
-                            <button class="battle-btn bg-slate-600 hover:bg-slate-500 rounded-lg text-white font-bold shadow-md h-12" onclick="runAway()">Fugir</button>
-                        </div>
-
-                        <!-- MENU DE GOLPES (4 Golpes + Voltar) -->
-                        <div id="moves-menu" class="absolute inset-0 hidden grid-cols-2 gap-2 p-2 pt-0 h-full">
-                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(0)" id="move-0">Atk 1</button>
-                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(1)" id="move-1">Atk 2</button>
-                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(2)" id="move-2">Atk 3</button>
-                            <div class="flex gap-2">
-                                <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md flex-1" onclick="useMove(3)" id="move-3">Atk 4</button>
-                                <button class="battle-btn rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs shadow-md flex-1" onclick="showMainMenu()">Voltar</button>
-                            </div>
-                        </div>
-                        
-                        <!-- TELA DE TROCA -->
-                        <div id="switch-controls" class="absolute inset-0 hidden flex items-center justify-around p-2 pt-0 h-full"></div>
-
-                        <!-- CONTROLES DE FIM -->
-                        <div id="end-controls" class="absolute inset-0 hidden flex-col sm:flex-row items-center justify-center p-2 gap-2 h-full">
-                            <button id="btn-catch" class="hidden bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-full border-4 border-white shadow-[0_0_20px_rgba(234,179,8,0.8)]" onclick="tryCatch()">Lançar Ultra Ball</button>
-                            <button class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-8 rounded-lg" onclick="resetBattleUI()">Sair da Arena</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="battle-loading" class="hidden absolute inset-0 bg-black/90 z-50 flex flex-col items-center justify-center">
-                    <div class="spinner mb-4 border-red-500 border-l-white"></div>
-                    <p class="text-white font-bold pixel-font text-[10px]">Preparando a Arena 3D...</p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- MODAL API KEY -->
-    <div id="api-key-modal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl max-w-md w-full relative transform transition-all">
-            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl text-amber-500 font-bold mb-4 title-font">Configuração Telepática</h2>
-            <p class="text-slate-300 mb-4 text-sm">Para falar com as divindades, você precisa de uma chave da API Gemini do Google Studio.</p>
-            <p class="text-slate-400 mb-4 text-xs">
-                1. Acesse <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 hover:underline">Google AI Studio</a><br>
-                2. Crie uma nova API Key<br>
-                3. Cole a chave abaixo
-            </p>
-            <input type="password" id="api-key-input" placeholder="Cole sua API Key aqui (AIzaSy...)" class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:border-amber-500 mb-4">
-            <button onclick="saveApiKey()" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-lg font-bold transition-colors shadow-lg shadow-amber-900/50">Salvar Conexão</button>
-            <p id="api-key-success" class="hidden text-green-400 text-xs text-center mt-3">Conexão estabelecida com sucesso!</p>
-        </div>
-    </div>
-
-    <script>
         // --- PARALLAX JAVASCRIPT ---
         document.addEventListener('mousemove', (e) => {
             const x = (e.clientX - window.innerWidth / 2) / window.innerWidth;
@@ -544,7 +146,7 @@
         ];
 
         const typeColors = { normal:'#A8A77A', fire:'#EE8130', water:'#6390F0', electric:'#F7D02C', grass:'#7AC74C', ice:'#96D9D6', fighting:'#C22E28', poison:'#A33EA1', ground:'#E2BF65', flying:'#A98FF3', psychic:'#F95587', bug:'#A6B91A', rock:'#B6A136', ghost:'#735797', dragon:'#6F35FC', dark:'#705746', steel:'#B7B7CE', fairy:'#D685AD' };
-        
+
         // TYPE MATRIX DE BATALHA
         const typeMatrix = {
             normal: { rock: 0.5, ghost: 0, steel: 0.5 }, fire: { fire: 0.5, water: 0.5, grass: 2, ice: 2, bug: 2, rock: 0.5, dragon: 0.5, steel: 2 },
@@ -560,9 +162,9 @@
 
         const getMultiplier = (atkType, defTypes) => { let m = 1; defTypes.forEach(t => { if(typeMatrix[atkType] && typeMatrix[atkType][t] !== undefined) m *= typeMatrix[atkType][t]; }); return m; };
 
-        let currentLegendary = null; 
-        let globalPokedex = []; 
-        let myTeam = []; 
+        let currentLegendary = null;
+        let globalPokedex = [];
+        let myTeam = [];
         let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
         const translationCache = new Map();
@@ -608,22 +210,22 @@
                 const div = document.createElement('div'); div.className = 'w-full mb-8';
                 div.innerHTML = `<div class="tier-title title-font">${tier.title}</div><div class="tier-row" id="row-${tier.title.replace(/\s/g,'')}"></div>`;
                 container.appendChild(div);
-                
+
                 tier.pokemon.forEach(poke => {
                     const node = document.createElement('div'); node.className = 'poke-node'; node.id = `node-${poke}`;
                     node.onclick = () => selectLegendary(poke);
                     node.innerHTML = `<img id="img-${poke}" src=""><div class="tooltip">${getDisplayName(poke)}</div>`;
                     document.getElementById(`row-${tier.title.replace(/\s/g,'')}`).appendChild(node);
-                    
+
                     fetch(`https://pokeapi.co/api/v2/pokemon/${poke}`).then(r=>r.json()).then(d => {
                         document.getElementById(`img-${poke}`).src = d.sprites.other['official-artwork'].front_default;
-                    }).catch(()=>{}); 
+                    }).catch(()=>{});
                 });
             });
 
             fetch('https://pokeapi.co/api/v2/pokemon?limit=1200').then(r=>r.json()).then(d => {
                 const legendKeys = Object.keys(extendedLoreDB);
-                globalPokedex = d.results.filter(p => !legendKeys.includes(p.name) && !p.name.includes('-')); 
+                globalPokedex = d.results.filter(p => !legendKeys.includes(p.name) && !p.name.includes('-'));
                 renderSearch(globalPokedex.slice(0, 20));
             });
 
@@ -638,20 +240,20 @@
 
             const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokeName}`);
             const data = await resp.json();
-            
+
             const detailImg = document.getElementById('detail-img');
             const gifUrl = data.sprites.other?.showdown?.front_default;
             detailImg.src = gifUrl || data.sprites.front_default;
-
+            if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
             document.getElementById('detail-name').innerText = getDisplayName(pokeName);
             document.getElementById('detail-types').innerHTML = data.types.map(t => `<span class="type-badge" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
-            
+
             document.getElementById('detail-extended-lore').innerHTML = `<p>${extendedLoreDB[pokeName] || "Lenda sem registo."}</p>`;
             document.getElementById('detail-short-lore').innerText = "";
             document.getElementById('tab-lore').scrollTop = 0;
             switchTab('lore');
-            
+
             resetBattleUI();
             document.getElementById('modal-backdrop').classList.replace('backdrop-closed', 'backdrop-open');
             document.getElementById('details-drawer').classList.replace('drawer-closed', 'drawer-open');
@@ -697,106 +299,16 @@
 
         function renderSearch(list) {
             document.getElementById('search-results').innerHTML = list.map(p => `
-                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="openMoveSelection(\'${p.name}\', \'${p.url}\')">
+                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="addToTeam('${p.name}', '${p.url}')">
                     <span class="capitalize text-sm font-bold text-slate-200">${p.name}</span><span class="text-xs text-amber-500 font-bold">+</span>
                 </div>
             `).join('');
         }
 
-
-        let pendingPokeName = "";
-        let pendingPokeUrl = "";
-        let fetchedMovesCache = [];
-
-        async function openMoveSelection(name, url) {
-            if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
-
-            pendingPokeName = name;
-            pendingPokeUrl = url;
-
-            document.getElementById('battle-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('hidden');
-            document.getElementById('move-selection').classList.add('flex');
-
-            document.getElementById('move-selection-poke-name').innerText = getDisplayName(name);
-            document.getElementById('moves-selection-list').innerHTML = '';
-            document.getElementById('loading-moves').classList.remove('hidden');
-            document.getElementById('loading-moves').classList.add('flex');
-            document.getElementById('btn-confirm-moves').disabled = true;
-
-            try {
-                const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-                const d = await r.json();
-
-                // Extrai url dos moves
-                fetchedMovesCache = d.moves.map(m => ({
-                    name: m.move.name,
-                    url: m.move.url
-                })).sort((a,b) => a.name.localeCompare(b.name));
-
-                renderMovesList();
-            } catch (e) {
-                console.error("Erro a carregar ataques:", e);
-                cancelMoveSelection();
-            } finally {
-                document.getElementById('loading-moves').classList.add('hidden');
-                document.getElementById('loading-moves').classList.remove('flex');
-                document.getElementById('btn-confirm-moves').disabled = false;
-            }
-        }
-
-        function renderMovesList() {
-            const listContainer = document.getElementById('moves-selection-list');
-            listContainer.innerHTML = fetchedMovesCache.map((m, idx) => `
-                <label class="flex items-center gap-2 p-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded cursor-pointer transition-colors">
-                    <input type="checkbox" name="poke-move-check" value="${idx}" class="w-4 h-4 text-amber-500 bg-slate-900 border-slate-600 focus:ring-amber-500 cursor-pointer" onchange="limitMoveSelection(this)">
-                    <span class="text-sm font-bold text-slate-200 capitalize">${m.name.replace('-', ' ')}</span>
-                </label>
-            `).join('');
-        }
-
-        function limitMoveSelection(checkbox) {
-            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
-            if (checkboxes.length > 4) {
-                checkbox.checked = false; // undo
-            }
-        }
-
-        function cancelMoveSelection() {
-            document.getElementById('move-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('flex');
-            document.getElementById('battle-selection').classList.remove('hidden');
-            pendingPokeName = "";
-            pendingPokeUrl = "";
-            fetchedMovesCache = [];
-        }
-
-
-        async function confirmMoves() {
-            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
-            if (checkboxes.length === 0) {
-                alert("Selecione pelo menos 1 ataque!");
-                return;
-            }
-
-            const selectedMoveUrls = Array.from(checkboxes).map(cb => fetchedMovesCache[cb.value].url);
-
-            // hide ui back to battle-selection
-            document.getElementById('move-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('flex');
-            document.getElementById('battle-selection').classList.remove('hidden');
-
-            await addToTeam(pendingPokeName, pendingPokeUrl, selectedMoveUrls);
-
-            pendingPokeName = "";
-            pendingPokeUrl = "";
-            fetchedMovesCache = [];
-        }
-
-        async function addToTeam(name, url, selectedMoves = null) {
+        async function addToTeam(name, url) {
             if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
             const id = url.split('/').filter(Boolean).pop();
-            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, selectedMoves });
+            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` });
             renderTeamSlots();
         }
 
@@ -806,7 +318,7 @@
             for(let i=0; i<3; i++) {
                 const slot = document.getElementById(`slot-${i}`);
                 if(myTeam[i]) {
-                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain "><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
+                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain pixelated-img"><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
                     slot.classList.replace('border-dashed', 'border-solid'); slot.classList.replace('border-slate-600', 'border-amber-500');
                 } else {
                     slot.innerHTML = `<span class="text-slate-600 font-bold text-xl">+</span>`;
@@ -818,32 +330,20 @@
             else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Selecionar 3 para Iniciar"; }
         }
 
-        async function buildFighter(name, level, isEnemy, chosenMoves = null) {
+        async function buildFighter(name, level, isEnemy) {
             const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`); const d = await r.json();
             const getStat = (n) => d.stats.find(s=>s.stat.name===n).base_stat;
             const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
             const atk = Math.floor(0.01 * (2 * getStat('attack') + 31) * level) + 5;
             const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
-            const sprite = isEnemy ? (d.sprites.other['official-artwork'].front_default || d.sprites.front_default) : (d.sprites.other['official-artwork'].front_default || d.sprites.front_default);
+            const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
 
-            let mList = [];
-            if (chosenMoves && chosenMoves.length > 0) {
-                mList = chosenMoves;
-            } else {
-                mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
-            }
-
+            const mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
             let fMoves = [];
             for(let url of mList) {
-                if(fMoves.length === 4) break; 
+                if(fMoves.length === 4) break;
                 const mr = await fetch(url); const md = await mr.json();
-
-                // Allow user chosen moves even if status moves (fallback to 40 power)
-                if (chosenMoves && chosenMoves.length > 0) {
-                     fMoves.push({ name: md.name, power: md.power > 0 ? md.power : 40, type: md.type.name });
-                } else if(md.power > 0) {
-                     fMoves.push({ name: md.name, power: md.power, type: md.type.name });
-                }
+                if(md.power > 0) fMoves.push({ name: md.name, power: md.power, type: md.type.name });
             }
             if(fMoves.length === 0) fMoves.push({name: "Struggle", power: 50, type: "normal"});
 
@@ -861,14 +361,14 @@
             document.getElementById('battle-selection').classList.add('hidden');
             document.getElementById('battle-arena').classList.remove('hidden');
             document.getElementById('battle-arena').classList.add('flex');
-            document.getElementById('drawer-header').style.display = 'none'; 
+            document.getElementById('drawer-header').style.display = 'none';
             document.getElementById('battle-loading').classList.remove('hidden');
 
             try {
                 const enemy = await buildFighter(currentLegendary, 100, true);
-                const p1 = await buildFighter(myTeam[0].name, 65, false, myTeam[0].selectedMoves);
-                const p2 = await buildFighter(myTeam[1].name, 65, false, myTeam[1].selectedMoves);
-                const p3 = await buildFighter(myTeam[2].name, 65, false, myTeam[2].selectedMoves);
+                const p1 = await buildFighter(myTeam[0].name, 65, false);
+                const p2 = await buildFighter(myTeam[1].name, 65, false);
+                const p3 = await buildFighter(myTeam[2].name, 65, false);
                 battleState = { playerTeam: [p1, p2, p3], enemyTeam: [enemy], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
                 updateArenaUI();
@@ -909,20 +409,20 @@
             document.getElementById('arena-enemy-name').innerText = getDisplayName(e.name);
             document.getElementById('arena-enemy-img').src = e.sprite;
             document.getElementById('arena-enemy-img').classList.remove('anim-faint');
-
+            if(e.sprite.endsWith('.gif')) document.getElementById('arena-enemy-img').classList.add('pixelated-img');
             updateHPBar('enemy', e.hpCurrent, e.hpMax);
 
             document.getElementById('arena-player-name').innerText = getDisplayName(p.name);
             document.getElementById('arena-player-img').src = p.sprite;
             document.getElementById('arena-player-img').classList.remove('anim-faint');
-
+            if(p.sprite.endsWith('.gif')) document.getElementById('arena-player-img').classList.add('pixelated-img');
             updateHPBar('player', p.hpCurrent, p.hpMax);
             document.getElementById('arena-player-hp-num').innerText = Math.max(0, p.hpCurrent); document.getElementById('arena-player-hp-max').innerText = p.hpMax;
 
             // Preenche os 4 Botões de Ataque
             for(let i=0; i<4; i++) {
                 const btn = document.getElementById(`move-${i}`);
-                if(p.moves[i]) { btn.innerText = p.moves[i].name; btn.style.visibility = 'visible'; btn.style.backgroundColor = typeColors[p.moves[i].type]; } 
+                if(p.moves[i]) { btn.innerText = p.moves[i].name; btn.style.visibility = 'visible'; btn.style.backgroundColor = typeColors[p.moves[i].type]; }
                 else { btn.style.visibility = 'hidden'; }
             }
         }
@@ -934,11 +434,10 @@
         function logBattle(t) { document.getElementById('battle-log').innerText = t; }
         const wait = ms => new Promise(r => setTimeout(r, ms));
 
-        function spawnVFX(containerId, color) {
+        function spawnVFX(containerId) {
             const container = document.getElementById(containerId);
             const vfx = document.createElement('div');
             vfx.className = 'vfx-impact';
-            if(color) vfx.style.background = `radial-gradient(circle, #fff 0%, ${color} 40%, transparent 80%)`;
             container.appendChild(vfx);
             setTimeout(() => vfx.remove(), 500);
         }
@@ -958,7 +457,7 @@
         async function useMove(i) {
             if(battleState.isOver) return;
             const p = battleState.playerTeam[battleState.activePlayerIdx]; const e = battleState.enemyTeam[0];
-            
+
             // Esconde os menus e ataca
             document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
 
@@ -968,19 +467,19 @@
             // TURNO DO INIMIGO COM FALA INSTANTÂNEA
             logBattle(`O Deus foca a sua energia cósmica...`);
             const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
-            
+
             const taunt = getRandomQuote(e.name);
             await showSpeechBubble(taunt);
 
             await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
             if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
-            
+
             showMainMenu();
         }
 
         async function executeAttack(aObj, dObj, m, targetImgId, dSide, containerId) {
             logBattle(`${aObj.name.toUpperCase()} ataca com ${m.name.toUpperCase()}!`); await wait(600);
-            
+
             // Animação de Investida
             const atkImg = document.getElementById(dSide === 'enemy' ? 'arena-player-img' : 'arena-enemy-img');
             const lungeClass = dSide === 'enemy' ? 'anim-lunge-player' : 'anim-lunge-enemy';
@@ -989,9 +488,9 @@
             await wait(250);
 
             // Animação de Impacto (Tremer, Flash Vermelho e Explosão Visual)
-            spawnVFX(containerId, typeColors[m.type]);
-            const img = document.getElementById(targetImgId); 
-            img.classList.add('anim-shake', 'anim-damage'); 
+            spawnVFX(containerId);
+            const img = document.getElementById(targetImgId);
+            img.classList.add('anim-shake', 'anim-damage');
             setTimeout(() => img.classList.remove('anim-shake', 'anim-damage'), 500);
 
             // Cálculo Matemático c/ Golpes Críticos
@@ -1038,9 +537,9 @@
             sc.innerHTML = battleState.playerTeam.map((pk, i) => {
                 const alive = pk.hpCurrent > 0; const isCur = i === battleState.activePlayerIdx;
                 return `<div class="flex flex-col items-center p-2 rounded-lg border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
-                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 "><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
+                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 pixelated-img"><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
             }).join('');
-            
+
             // Esconde o botão de voltar se a troca for obrigatória
             if(!isForced && battleState.playerTeam[battleState.activePlayerIdx].hpCurrent > 0) sc.innerHTML += `<div class="p-2 text-xs font-bold text-white cursor-pointer hover:text-red-400" onclick="showMainMenu()">Voltar</div>`;
             sc.classList.remove('hidden'); sc.classList.add('flex');
@@ -1048,26 +547,26 @@
 
         async function performSwitch(i, isForced) {
             battleState.activePlayerIdx = i; document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
-            logBattle(`Vai tentar a sorte com ${battleState.playerTeam[i].name.toUpperCase()}!`); 
-            updateArenaUI(); 
+            logBattle(`Vai tentar a sorte com ${battleState.playerTeam[i].name.toUpperCase()}!`);
+            updateArenaUI();
             triggerEntryAnimation('arena-player-img', 'anim-enter-player');
             await wait(1200);
-            
+
             // Lógica Corrigida: Se a troca foi forçada porque um morreu, é o SEU turno. Se foi voluntária, perdeu a vez e o inimigo ataca.
             if (isForced) {
                 showMainMenu();
             } else {
                 const e = battleState.enemyTeam[0]; const p = battleState.playerTeam[i];
-                
+
                 logBattle(`O Deus não perdoa a troca...`);
                 const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
-                
+
                 const taunt = getRandomQuote(e.name);
                 await showSpeechBubble(taunt);
 
                 await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
                 if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
-                
+
                 showMainMenu();
             }
         }
@@ -1077,7 +576,7 @@
             document.getElementById('main-action-menu').classList.add('hidden'); document.getElementById('main-action-menu').classList.remove('grid');
             document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
             document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
-            
+
             const ec = document.getElementById('end-controls'); ec.classList.remove('hidden'); ec.classList.add('flex');
             if(isWin) { document.getElementById('btn-catch').classList.remove('hidden'); logBattle("Silêncio cósmico... Tens uma última chance de atirar a Ultra Ball!"); }
         }
@@ -1086,7 +585,7 @@
             document.getElementById('btn-catch').classList.add('hidden');
             logBattle("A Ultra Ball voa pelas trevas até ao alvo!"); await wait(2000);
             logBattle("Um... "); await wait(1000); logBattle("Um... Dois... "); await wait(1000);
-            if(Math.random() < 0.15) { logBattle(`Três! CLICK! O IMPOSSÍVEL ACONTECEU! CAPTURASTE O ${getDisplayName(currentLegendary).toUpperCase()}!`); } 
+            if(Math.random() < 0.15) { logBattle(`Três! CLICK! O IMPOSSÍVEL ACONTECEU! CAPTURASTE O ${getDisplayName(currentLegendary).toUpperCase()}!`); }
             else { logBattle("A BOLA EXPLODIU EM MIL PEDAÇOS! A Divindade ri-se e foge para o firmamento!"); }
         }
 
@@ -1101,7 +600,7 @@
             e.preventDefault(); const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
             i.value = ''; i.disabled = true;
             const c = document.getElementById('chat-messages'); c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-user">${t}</div>`); c.scrollTop = c.scrollHeight;
-            
+
             if (!apiKey || apiKey.trim() === '') {
                 c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-red-500 font-bold">A conexão falhou...</div>`);
                 c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-ai border-slate-600 text-sm text-slate-300">Para se comunicar com as divindades, você precisa fornecer a Chave API.<br><br>1. Clique no <strong>ícone de engrenagem</strong> no canto superior direito do chat.<br>2. Adicione sua chave do Google AI Studio.<br>3. Tente enviar a mensagem novamente.</div>`);
@@ -1127,6 +626,3 @@
         }
 
         init();
-    </script>
-</body>
-</html>
