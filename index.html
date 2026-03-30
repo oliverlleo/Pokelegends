@@ -76,7 +76,7 @@
         
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; min-height: 0; }
-
+        .pixelated-img { image-rendering: pixelated; transform: scale(1.5); transform-origin: bottom center; }
 
         /* BATALHA UI E ANIMAÇÕES ÉPICAS */
         .health-bar-container { width: 100%; height: 8px; background-color: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #020617; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
@@ -136,12 +136,6 @@
         @keyframes shake { 0%, 100% { transform: translate(0, 0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); } 20%, 40%, 60%, 80% { transform: translate(5px, 0); } }
         @keyframes vfxBurst { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; } }
         
-
-        @keyframes floatBreathe {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(1.02); }
-        }
-        .anim-breathe { animation: floatBreathe 3s ease-in-out infinite; }
         .anim-lunge-player { animation: lungePlayer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-lunge-enemy { animation: lungeEnemy 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-damage { animation: flashDamage 0.5s ease-out; }
@@ -263,13 +257,49 @@
             <!-- TELA DE SELEÇÃO -->
             <div id="battle-selection" class="flex-1 flex flex-col p-5 overflow-y-auto">
                 <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Monte sua Equipa</h3>
-                <p class="text-slate-400 text-sm text-center mb-4">Selecione 3 Pokémon comuns (Lvl 65) para enfrentar esta Lenda (Lvl 100).</p>
-                <div class="flex justify-center gap-3 mb-6">
-                    <div id="slot-0" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(0)"></div>
-                    <div id="slot-1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(1)"></div>
-                    <div id="slot-2" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(2)"></div>
-                </div>
-                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar 3 para Iniciar</button>
+                <p class="text-slate-400 text-sm text-center mb-4" id="mode-desc">Selecione Pokémon comuns (Nv 65) ou lute no Difícil (Nv 75) contra esta Lenda (Nv 100).</p>
+                    <h3 class="text-amber-500 font-bold mb-3 text-center text-sm tracking-widest uppercase mt-4">Selecionar Modo de Batalha</h3>
+                    <div class="flex flex-col sm:flex-row gap-2 justify-center mb-4">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="gameMode" value="standard" class="peer hidden" onchange="changeGameMode('standard')" checked>
+                            <div class="text-center p-2 rounded-lg border-2 border-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-500/20 text-slate-300 peer-checked:text-blue-400 transition-all font-bold text-sm">
+                                Clássico (Comum vs Lenda)
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="gameMode" value="rivalry" class="peer hidden" onchange="changeGameMode('rivalry')">
+                            <div class="text-center p-2 rounded-lg border-2 border-slate-600 peer-checked:border-fuchsia-500 peer-checked:bg-fuchsia-500/20 text-slate-300 peer-checked:text-fuchsia-400 transition-all font-bold text-sm">
+                                Rivalidade (Lenda vs Lenda)
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="difficulty-selector" class="mb-4">
+                        <h3 class="text-amber-500 font-bold mb-3 text-center text-xs tracking-widest uppercase">Dificuldade (Clássico)</h3>
+                        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="difficulty" value="easy" class="peer hidden" onchange="changeDifficulty('easy')">
+                                <div class="text-center py-1 px-2 rounded-lg border-2 border-slate-600 peer-checked:border-green-500 peer-checked:bg-green-500/20 text-slate-400 peer-checked:text-green-400 transition-all font-bold text-xs">
+                                    Fácil (6 Pkmn)
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="difficulty" value="normal" class="peer hidden" onchange="changeDifficulty('normal')" checked>
+                                <div class="text-center py-1 px-2 rounded-lg border-2 border-slate-600 peer-checked:border-amber-500 peer-checked:bg-amber-500/20 text-slate-400 peer-checked:text-amber-400 transition-all font-bold text-xs">
+                                    Normal (3 Pkmn)
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="difficulty" value="hard" class="peer hidden" onchange="changeDifficulty('hard')">
+                                <div class="text-center py-1 px-2 rounded-lg border-2 border-slate-600 peer-checked:border-red-500 peer-checked:bg-red-500/20 text-slate-400 peer-checked:text-red-400 transition-all font-bold text-xs">
+                                    Difícil (1 Pkmn)
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                <div id="team-slots" class="grid grid-cols-3 gap-3 mb-6 max-w-[280px] sm:max-w-[320px] mx-auto justify-items-center"></div>
+                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar Equipa</button>
                 <input type="text" id="poke-search" placeholder="Pesquisar Pokémon Comum..." class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-2 mb-4 focus:border-amber-500 outline-none" oninput="filterSearch()">
                 <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
             </div>
@@ -313,7 +343,7 @@
                         </div>
                         <div class="relative w-36 h-36 absolute right-2 sm:right-8 bottom-0 flex justify-center items-end" id="enemy-img-container">
                             <div class="battle-platform battle-platform-enemy z-0"></div>
-                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
+                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
                             <!-- Balão de Fala Injetado Abaixo do Inimigo -->
                             <div id="enemy-speech-bubble" class="speech-bubble hidden"></div>
                         </div>
@@ -323,7 +353,7 @@
                     <div class="flex justify-start items-end w-full relative h-40">
                         <div class="relative w-40 h-40 absolute left-2 sm:left-8 bottom-0 flex justify-center items-end" id="player-img-container">
                             <div class="battle-platform z-0"></div>
-                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10 anim-breathe">
+                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
                         </div>
                         <div class="rpg-box p-2 w-52 ml-auto mr-2 sm:mr-4 mb-4 z-20">
                             <div class="flex justify-between items-center mb-1"><span id="arena-player-name" class="font-bold text-white capitalize text-sm">Player</span><span class="text-xs text-blue-400 font-bold">Lv65</span></div>
@@ -359,7 +389,7 @@
                         </div>
                         
                         <!-- TELA DE TROCA -->
-                        <div id="switch-controls" class="absolute inset-0 hidden flex items-center justify-around p-2 pt-0 h-full"></div>
+                        <div id="switch-controls" class="absolute inset-0 hidden flex flex-wrap items-center justify-center gap-2 p-2 pt-0 h-full overflow-y-auto"></div>
 
                         <!-- CONTROLES DE FIM -->
                         <div id="end-controls" class="absolute inset-0 hidden flex-col sm:flex-row items-center justify-center p-2 gap-2 h-full">
@@ -562,7 +592,11 @@
 
         let currentLegendary = null; 
         let globalPokedex = []; 
-        let myTeam = []; 
+        let legendariesList = Object.keys(extendedLoreDB);
+        let myTeam = [];
+        let currentDifficulty = 'normal';
+        let currentGameMode = 'standard';
+        let maxTeamSize = 3;
         let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
         const translationCache = new Map();
@@ -603,6 +637,10 @@
         }
 
         async function init() {
+            legendariesList = [];
+            hierarchyTiers.forEach(tier => {
+                tier.pokemon.forEach(p => legendariesList.push(p));
+            });
             const container = document.getElementById('pyramid-content');
             hierarchyTiers.forEach(tier => {
                 const div = document.createElement('div'); div.className = 'w-full mb-8';
@@ -622,9 +660,8 @@
             });
 
             fetch('https://pokeapi.co/api/v2/pokemon?limit=1200').then(r=>r.json()).then(d => {
-                const legendKeys = Object.keys(extendedLoreDB);
-                globalPokedex = d.results.filter(p => !legendKeys.includes(p.name) && !p.name.includes('-')); 
-                renderSearch(globalPokedex.slice(0, 20));
+                globalPokedex = d.results.filter(p => !p.name.includes('-'));
+                filterSearch(); // use our new filter logic
             });
 
             document.getElementById('loading-main').style.display = 'none';
@@ -642,7 +679,7 @@
             const detailImg = document.getElementById('detail-img');
             const gifUrl = data.sprites.other?.showdown?.front_default;
             detailImg.src = gifUrl || data.sprites.front_default;
-
+            if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
             document.getElementById('detail-name').innerText = getDisplayName(pokeName);
             document.getElementById('detail-types').innerHTML = data.types.map(t => `<span class="type-badge" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
@@ -679,6 +716,41 @@
             resetBattleUI();
         }
 
+
+        function changeGameMode(mode) {
+            currentGameMode = mode;
+            document.getElementById('difficulty-selector').style.display = (mode === 'standard') ? 'block' : 'none';
+            document.getElementById('poke-search').placeholder = (mode === 'standard') ? 'Pesquisar Pokémon Comum...' : 'Pesquisar Lendário/Mítico...';
+            document.getElementById('mode-desc').innerText = (mode === 'standard') ? 'Selecione Pokémon comuns (Nv 65) ou lute no Difícil (Nv 75) contra esta Lenda (Nv 100).' : 'Escolha um Deus para uma Batalha de Rivalidade 1v1 (Nv 100).';
+
+            if (mode === 'rivalry') {
+                maxTeamSize = 1;
+            } else {
+                changeDifficulty(currentDifficulty); // Reset to selected difficulty
+                return;
+            }
+
+            if (myTeam.length > maxTeamSize) myTeam = myTeam.slice(0, maxTeamSize);
+            renderTeamSlots();
+            checkBattleReady();
+            filterSearch();
+        }
+
+        function changeDifficulty(diff) {
+            currentDifficulty = diff;
+            if (currentGameMode === 'rivalry') return;
+
+            if (diff === 'easy') maxTeamSize = 6;
+            else if (diff === 'normal') maxTeamSize = 3;
+            else if (diff === 'hard') maxTeamSize = 1;
+
+            if (myTeam.length > maxTeamSize) {
+                myTeam = myTeam.slice(0, maxTeamSize);
+            }
+            renderTeamSlots();
+            checkBattleReady();
+        }
+
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
@@ -692,130 +764,60 @@
 
         function filterSearch() {
             const q = document.getElementById('poke-search').value.toLowerCase();
-            renderSearch(globalPokedex.filter(p => p.name.includes(q)).slice(0, 20));
+            let filtered = globalPokedex.filter(p => p.name.includes(q));
+
+            if (currentGameMode === 'rivalry') {
+                filtered = filtered.filter(p => legendariesList.includes(p.name));
+            } else {
+                filtered = filtered.filter(p => !legendariesList.includes(p.name));
+            }
+
+            renderSearch(filtered.slice(0, 20));
         }
 
         function renderSearch(list) {
-            document.getElementById('search-results').innerHTML = list.map(p => `
-                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="openMoveSelection(\'${p.name}\', \'${p.url}\')">
+            const sr = document.getElementById('search-results');
+            if(!sr) return;
+            sr.innerHTML = list.map(p => `
+                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="addToTeam('${p.name}', '${p.url}')">
                     <span class="capitalize text-sm font-bold text-slate-200">${p.name}</span><span class="text-xs text-amber-500 font-bold">+</span>
                 </div>
             `).join('');
         }
 
-
-        let pendingPokeName = "";
-        let pendingPokeUrl = "";
-        let fetchedMovesCache = [];
-
-        async function openMoveSelection(name, url) {
-            if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
-
-            pendingPokeName = name;
-            pendingPokeUrl = url;
-
-            document.getElementById('battle-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('hidden');
-            document.getElementById('move-selection').classList.add('flex');
-
-            document.getElementById('move-selection-poke-name').innerText = getDisplayName(name);
-            document.getElementById('moves-selection-list').innerHTML = '';
-            document.getElementById('loading-moves').classList.remove('hidden');
-            document.getElementById('loading-moves').classList.add('flex');
-            document.getElementById('btn-confirm-moves').disabled = true;
-
-            try {
-                const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-                const d = await r.json();
-
-                // Extrai url dos moves
-                fetchedMovesCache = d.moves.map(m => ({
-                    name: m.move.name,
-                    url: m.move.url
-                })).sort((a,b) => a.name.localeCompare(b.name));
-
-                renderMovesList();
-            } catch (e) {
-                console.error("Erro a carregar ataques:", e);
-                cancelMoveSelection();
-            } finally {
-                document.getElementById('loading-moves').classList.add('hidden');
-                document.getElementById('loading-moves').classList.remove('flex');
-                document.getElementById('btn-confirm-moves').disabled = false;
-            }
-        }
-
-        function renderMovesList() {
-            const listContainer = document.getElementById('moves-selection-list');
-            listContainer.innerHTML = fetchedMovesCache.map((m, idx) => `
-                <label class="flex items-center gap-2 p-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded cursor-pointer transition-colors">
-                    <input type="checkbox" name="poke-move-check" value="${idx}" class="w-4 h-4 text-amber-500 bg-slate-900 border-slate-600 focus:ring-amber-500 cursor-pointer" onchange="limitMoveSelection(this)">
-                    <span class="text-sm font-bold text-slate-200 capitalize">${m.name.replace('-', ' ')}</span>
-                </label>
-            `).join('');
-        }
-
-        function limitMoveSelection(checkbox) {
-            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
-            if (checkboxes.length > 4) {
-                checkbox.checked = false; // undo
-            }
-        }
-
-        function cancelMoveSelection() {
-            document.getElementById('move-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('flex');
-            document.getElementById('battle-selection').classList.remove('hidden');
-            pendingPokeName = "";
-            pendingPokeUrl = "";
-            fetchedMovesCache = [];
-        }
-
-
-        async function confirmMoves() {
-            const checkboxes = document.querySelectorAll('input[name="poke-move-check"]:checked');
-            if (checkboxes.length === 0) {
-                alert("Selecione pelo menos 1 ataque!");
-                return;
-            }
-
-            const selectedMoveUrls = Array.from(checkboxes).map(cb => fetchedMovesCache[cb.value].url);
-
-            // hide ui back to battle-selection
-            document.getElementById('move-selection').classList.add('hidden');
-            document.getElementById('move-selection').classList.remove('flex');
-            document.getElementById('battle-selection').classList.remove('hidden');
-
-            await addToTeam(pendingPokeName, pendingPokeUrl, selectedMoveUrls);
-
-            pendingPokeName = "";
-            pendingPokeUrl = "";
-            fetchedMovesCache = [];
-        }
-
-        async function addToTeam(name, url, selectedMoves = null) {
-            if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
+        async function addToTeam(name, url) {
+            if(myTeam.length >= maxTeamSize || myTeam.find(p => p.name === name)) return;
             const id = url.split('/').filter(Boolean).pop();
             myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, selectedMoves });
             renderTeamSlots();
         }
 
+        function checkBattleReady() {
+            const btn = document.getElementById('btn-start-battle');
+            if(!btn) return;
+            if(myTeam.length === maxTeamSize) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "INICIAR BATALHA ÉPICA"; }
+            else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = `Selecionar ${maxTeamSize} para Iniciar`; }
+        }
+
         function removeSlot(idx) { if(!myTeam[idx]) return; myTeam.splice(idx, 1); renderTeamSlots(); }
 
         function renderTeamSlots() {
-            for(let i=0; i<3; i++) {
-                const slot = document.getElementById(`slot-${i}`);
+            const container = document.getElementById("team-slots"); if(!container) return; container.innerHTML=""; for(let i=0; i<maxTeamSize; i++) {
+                const slot = document.createElement('div');
+                slot.id = `slot-${i}`;
+                slot.className = "w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 flex items-center justify-center bg-slate-800/50 relative overflow-visible cursor-pointer transition-colors";
                 if(myTeam[i]) {
-                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain "><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
-                    slot.classList.replace('border-dashed', 'border-solid'); slot.classList.replace('border-slate-600', 'border-amber-500');
+                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain pixelated-img"><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
+                    slot.classList.add('border-solid', 'border-amber-500');
+                    slot.onclick = () => removeSlot(i);
                 } else {
                     slot.innerHTML = `<span class="text-slate-600 font-bold text-xl">+</span>`;
-                    slot.classList.replace('border-solid', 'border-dashed'); slot.classList.replace('border-amber-500', 'border-slate-600');
+                    slot.classList.add('border-dashed', 'border-slate-600');
+                    slot.onclick = null;
                 }
+                container.appendChild(slot);
             }
-            const btn = document.getElementById('btn-start-battle');
-            if(myTeam.length === 3) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "INICIAR BATALHA ÉPICA"; }
-            else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Selecionar 3 para Iniciar"; }
+checkBattleReady();
         }
 
         async function buildFighter(name, level, isEnemy, chosenMoves = null) {
@@ -824,7 +826,7 @@
             const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
             const atk = Math.floor(0.01 * (2 * getStat('attack') + 31) * level) + 5;
             const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
-            const sprite = isEnemy ? (d.sprites.other['official-artwork'].front_default || d.sprites.front_default) : (d.sprites.other['official-artwork'].front_default || d.sprites.front_default);
+            const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
 
             let mList = [];
             if (chosenMoves && chosenMoves.length > 0) {
@@ -909,13 +911,13 @@
             document.getElementById('arena-enemy-name').innerText = getDisplayName(e.name);
             document.getElementById('arena-enemy-img').src = e.sprite;
             document.getElementById('arena-enemy-img').classList.remove('anim-faint');
-
+            if(e.sprite.endsWith('.gif')) document.getElementById('arena-enemy-img').classList.add('pixelated-img');
             updateHPBar('enemy', e.hpCurrent, e.hpMax);
 
             document.getElementById('arena-player-name').innerText = getDisplayName(p.name);
             document.getElementById('arena-player-img').src = p.sprite;
             document.getElementById('arena-player-img').classList.remove('anim-faint');
-
+            if(p.sprite.endsWith('.gif')) document.getElementById('arena-player-img').classList.add('pixelated-img');
             updateHPBar('player', p.hpCurrent, p.hpMax);
             document.getElementById('arena-player-hp-num').innerText = Math.max(0, p.hpCurrent); document.getElementById('arena-player-hp-max').innerText = p.hpMax;
 
@@ -1035,10 +1037,11 @@
             document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
 
             const sc = document.getElementById('switch-controls');
+            if(!sc) return;
             sc.innerHTML = battleState.playerTeam.map((pk, i) => {
                 const alive = pk.hpCurrent > 0; const isCur = i === battleState.activePlayerIdx;
-                return `<div class="flex flex-col items-center p-2 rounded-lg border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
-                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 "><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
+                return `<div class="flex flex-col items-center p-1 rounded border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
+                        <img src="${pk.sprite}" class="w-8 h-8 sm:w-10 sm:h-10 pixelated-img"><div class="w-12 h-1 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
             }).join('');
             
             // Esconde o botão de voltar se a troca for obrigatória
