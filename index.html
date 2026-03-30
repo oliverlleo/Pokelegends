@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Hierarquia dos Lendários Pokémon (Pura)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap');
+
+        body {
+            background-color: #020617; color: #e2e8f0; font-family: 'Nunito', sans-serif;
+            overflow-x: hidden; margin: 0; padding: 0;
+        }
+
+        h1, h2, h3, .title-font { font-family: 'Cinzel', serif; }
+        .pixel-font { font-family: 'Press Start 2P', cursive; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* PARALLAX ESPACIAL (PIRÂMIDE PRINCIPAL) */
+        #parallax-bg {
+            position: fixed; top: -50px; left: -50px; right: -50px; bottom: -50px;
+            z-index: -1; overflow: hidden; pointer-events: none; background-color: #020617;
+        }
+        .layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; will-change: transform; transition: transform 0.3s ease-out; }
+        .nebula { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; mix-blend-mode: screen; animation: pulse 10s infinite alternate ease-in-out; }
+        .nebula-purple { background: rgba(88, 28, 135, 0.4); width: 60vw; height: 60vh; top: -10%; left: -10%; }
+        .nebula-blue { background: rgba(30, 58, 138, 0.3); width: 70vw; height: 70vh; bottom: -10%; right: -10%; animation-delay: -3s; }
+        .nebula-gold { background: rgba(180, 83, 9, 0.2); width: 40vw; height: 40vh; top: 30%; left: 30%; filter: blur(150px); animation-delay: -6s;}
+
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.1); opacity: 0.7; } }
+        @keyframes divineFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .animate-divine-float { animation: divineFloat 4s ease-in-out infinite; }
+
+        .stars-sm { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='10' cy='10' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='150' cy='50' r='0.5' fill='white' opacity='0.2'/%3E%3Ccircle cx='80' cy='180' r='1' fill='white' opacity='0.5'/%3E%3Ccircle cx='190' cy='120' r='1.5' fill='white' opacity='0.3'/%3E%3C/svg%3E") repeat; }
+        .stars-md { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ccircle cx='50' cy='50' r='1.5' fill='white' opacity='0.6'/%3E%3Ccircle cx='200' cy='150' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='100' cy='250' r='2' fill='white' opacity='0.3'/%3E%3C/svg%3E") repeat; }
+        .stars-lg { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='100' cy='100' r='2.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='300' cy='200' r='1.5' fill='white' opacity='0.5'/%3E%3C/svg%3E") repeat; }
+
+        /* PIRÂMIDE E UI GERAL */
+        .pyramid-container { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; padding: 3rem 1rem; max-width: 1400px; margin: 0 auto; }
+        .tier-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; width: 100%; }
+        .poke-node {
+            width: 75px; height: 75px; border-radius: 50%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+            border: 1px solid rgba(71, 85, 105, 0.5); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
+        }
+        .poke-node:hover { transform: scale(1.15) translateY(-8px); border-color: rgba(251, 191, 36, 0.8); box-shadow: 0 15px 35px rgba(251, 191, 36, 0.2), inset 0 0 20px rgba(251, 191, 36, 0.1); background: rgba(30, 41, 59, 0.8); z-index: 10; }
+        .poke-node.active { border-color: #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.7), inset 0 0 15px rgba(251, 191, 36, 0.3); transform: scale(1.1); background: rgba(30, 41, 59, 0.9); z-index: 10; }
+        .poke-node img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: all 0.3s ease; }
+        
+        .tooltip {
+            position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
+            white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; text-transform: capitalize; z-index: 20; font-weight: 600;
+        }
+        .poke-node:hover .tooltip { opacity: 1; }
+
+        .tier-title { text-align: center; font-size: 1.2rem; color: rgba(251, 191, 36, 0.9); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; width: 100%; text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3); font-weight: 700; }
+        .type-badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: white; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.5); }
+
+        .spinner { border: 3px solid rgba(255, 255, 255, 0.1); border-left-color: #fbbf24; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* MODAL LATERAL */
+        .drawer-open { transform: translateX(0); }
+        .drawer-closed { transform: translateX(100%); }
+        .backdrop-open { opacity: 1; pointer-events: auto; }
+        .backdrop-closed { opacity: 0; pointer-events: none; }
+        
+        .chat-bubble-ai { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px 12px 12px 2px; padding: 10px 14px; color: #f8fafc; max-width: 85%; align-self: flex-start; }
+        .chat-bubble-user { background-color: #3b82f6; color: white; border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 85%; align-self: flex-end; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; min-height: 0; }
+        .pixelated-img { image-rendering: pixelated; }
+
+        /* BATALHA UI E ANIMAÇÕES ÉPICAS */
+        .health-bar-container { width: 100%; height: 8px; background-color: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #020617; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .health-bar { height: 100%; background-color: #22c55e; transition: width 0.3s ease, background-color 0.3s ease; }
+        .health-bar.yellow { background-color: #eab308; }
+        .health-bar.red { background-color: #ef4444; }
+        
+        .battle-btn { transition: transform 0.1s, border-color 0.2s; border: 2px solid transparent; }
+        .battle-btn:active { transform: scale(0.95); }
+        .battle-btn:hover { border-color: rgba(255,255,255,0.7); }
+
+        /* CAIXA DE DIÁLOGO RPG */
+        .rpg-box {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #94a3b8; border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        /* PARALLAX DA ARENA DE BATALHA */
+        @keyframes warpSpeed { 0% { background-position: 0 0; } 100% { background-position: -500px 1000px; } }
+        @keyframes warpSpeedSlow { 0% { background-position: 0 0; } 100% { background-position: -200px 500px; } }
+        
+        .arena-warp-1 { background: radial-gradient(circle, rgba(99,102,241,0.6) 2px, transparent 2px); background-size: 150px 150px; animation: warpSpeed 8s linear infinite; opacity: 0.5; }
+        .arena-warp-2 { background: radial-gradient(circle, rgba(168,85,247,0.4) 3px, transparent 3px); background-size: 250px 250px; animation: warpSpeedSlow 15s linear infinite; opacity: 0.3; }
+
+        /* NOVA GRELHA 3D DE BATALHA (PARALLAX DO CHÃO) */
+        .battle-grid {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+            background-image: linear-gradient(rgba(56, 189, 248, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.4) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(65deg);
+            transform-origin: bottom;
+            animation: gridMove 2s linear infinite;
+            border-top: 2px solid rgba(56, 189, 248, 0.8);
+            box-shadow: inset 0 20px 50px rgba(0,0,0,0.8);
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+
+        /* PLATAFORMAS 3D DE COMBATE */
+        .battle-platform {
+            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) rotateX(75deg);
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(56,189,248,0.5) 0%, rgba(0,0,0,0) 60%);
+            box-shadow: 0 0 30px rgba(56,189,248,0.3), inset 0 0 30px rgba(56,189,248,0.3);
+        }
+        .battle-platform-enemy { 
+            background: radial-gradient(circle, rgba(239,68,68,0.5) 0%, rgba(0,0,0,0) 60%); 
+            box-shadow: 0 0 30px rgba(239,68,68,0.3), inset 0 0 30px rgba(239,68,68,0.3); 
+        }
+
+        /* VFX DE ATAQUE */
+        @keyframes lungePlayer { 0% {transform: translate(0,0);} 50% {transform: translate(40px, -40px) scale(1.15);} 100% {transform: translate(0,0);} }
+        @keyframes lungeEnemy { 0% {transform: translate(0,0);} 50% {transform: translate(-40px, 40px) scale(1.15);} 100% {transform: translate(0,0);} }
+        @keyframes flashDamage { 0%, 100% {filter: brightness(1);} 50% {filter: brightness(2) drop-shadow(0 0 20px red); opacity: 0.7;} }
+        @keyframes slideInRight { 0% {transform: translateX(150px) scale(0.5); opacity: 0;} 100% {transform: translateX(0) scale(1); opacity: 1;} }
+        @keyframes slideInLeft { 0% {transform: translateX(-150px) scale(0.5); opacity: 0;} 100% {transform: translateX(0) scale(1); opacity: 1;} }
+        @keyframes shake { 0%, 100% { transform: translate(0, 0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); } 20%, 40%, 60%, 80% { transform: translate(5px, 0); } }
+        @keyframes vfxBurst { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; } }
+        
+        .anim-lunge-player { animation: lungePlayer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-lunge-enemy { animation: lungeEnemy 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-damage { animation: flashDamage 0.5s ease-out; }
+        .anim-enter-enemy { animation: slideInRight 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .anim-enter-player { animation: slideInLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .anim-shake { animation: shake 0.4s; }
+        .anim-faint { transition: all 0.8s ease; transform: translateY(50px); opacity: 0; filter: grayscale(1); }
+
+        .vfx-impact { 
+            position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
+            background: radial-gradient(circle, #fff 0%, #facc15 40%, transparent 80%); 
+            border-radius: 50%; pointer-events: none; z-index: 30;
+            animation: vfxBurst 0.4s ease-out forwards;
+            mix-blend-mode: color-dodge;
+        }
+
+        /* BALÃO DE FALA (SPEECH BUBBLE) DO LENDÁRIO */
+        .speech-bubble {
+            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95); color: #000;
+            padding: 8px 12px; border-radius: 12px; font-size: 11px; font-weight: 800;
+            text-align: center; width: 200px; z-index: 50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            border: 2px solid #cbd5e1;
+            font-family: 'Nunito', sans-serif;
+        }
+        .speech-bubble::before {
+            content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+            border-width: 0 8px 8px 8px; border-style: solid; border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+        }
+        .bubble-show { opacity: 1; }
+
+    </style>
+</head>
+<body class="h-full min-h-screen w-full relative">
+
+    <!-- FUNDO PARALLAX ESPACIAL PRINCIPAL -->
+    <div id="parallax-bg">
+        <div class="layer" id="layer-nebula" data-speed="0.5">
+            <div class="nebula nebula-purple"></div><div class="nebula nebula-blue"></div><div class="nebula nebula-gold"></div>
+        </div>
+        <div class="layer stars-sm" id="layer-stars-1" data-speed="2"></div>
+        <div class="layer stars-md" id="layer-stars-2" data-speed="4"></div>
+        <div class="layer stars-lg" id="layer-stars-3" data-speed="7"></div>
+    </div>
+
+    <!-- MAIN AREA PIRÂMIDE -->
+    <main class="w-full h-screen overflow-y-auto relative z-10" id="pyramid-area">
+        <div class="text-center pt-10 pb-6 sticky top-0 bg-gradient-to-b from-[#020617] via-[#020617]/90 to-transparent z-20">
+            <h1 class="text-4xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 font-bold mb-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">A Hierarquia Divina</h1>
+            <p class="text-slate-300 text-sm md:text-base font-light tracking-wide px-4">Apenas os verdadeiros Lendários e Míticos sagrados.</p>
+        </div>
+        <div id="loading-main" class="flex flex-col items-center justify-center h-64">
+            <div class="spinner mb-4 w-12 h-12 border-4"></div>
+            <p class="text-amber-400 title-font text-xl tracking-widest">Invocando as Lendas...</p>
+        </div>
+        <div id="pyramid-content" class="pyramid-container hidden pb-24 relative z-10"></div>
+    </main>
+
+    <!-- BACKDROP DO MODAL -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/80 z-40 backdrop-blur-sm backdrop-closed transition-opacity duration-300" onclick="closeModal()"></div>
+
+    <!-- MENU LATERAL (DRAWER) -->
+    <aside id="details-drawer" class="fixed top-0 right-0 h-full max-h-[100dvh] w-full sm:w-[500px] md:w-[600px] border-l border-slate-700 shadow-2xl z-50 flex flex-col drawer-closed transition-transform duration-300 ease-out bg-slate-900">
+        
+        <!-- CABEÇALHO LATERAL -->
+        <div id="drawer-header" class="relative w-full flex flex-col items-center justify-center pt-8 pb-2 bg-slate-900 shrink-0 border-b border-slate-800 transition-all">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-500 text-white rounded-full p-2 transition-all duration-200 z-50 focus:outline-none border border-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="relative w-full flex justify-center mb-2 animate-divine-float">
+                <div class="absolute inset-0 bg-amber-500/10 blur-[30px] rounded-full w-32 h-32 mx-auto top-1/2 -translate-y-1/2"></div>
+                <img id="detail-img" src="" alt="Pokemon" class="w-32 h-32 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
+            </div>
+            <div class="text-center relative z-10">
+                <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
+                <div id="detail-types" class="flex justify-center gap-2"></div>
+            </div>
+            <div class="flex w-full px-4 mt-4 gap-2 shrink-0">
+                <button onclick="switchTab('lore')" id="tab-btn-lore" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors text-amber-400 border-amber-400">História</button>
+                <button onclick="switchTab('chat')" id="tab-btn-chat" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-amber-200">Telepatia</button>
+                <button onclick="switchTab('battle')" id="tab-btn-battle" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-red-300">Batalha</button>
+            </div>
+        </div>
+
+        <!-- ABA HISTÓRIA -->
+        <div id="tab-lore" class="tab-content active flex-1 overflow-y-auto p-5 pb-32 space-y-6 bg-slate-900">
+            <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-inner relative overflow-hidden shrink-0">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                <h3 class="text-blue-400 text-sm md:text-base mb-2 font-bold uppercase tracking-widest">Registo Oficial</h3>
+                <div id="loading-lore" class="hidden flex items-center gap-3 my-2"><div class="spinner w-5 h-5 border-2"></div><span class="text-slate-400 text-sm">Traduzindo...</span></div>
+                <p id="detail-short-lore" class="text-slate-300 italic text-sm md:text-base font-light"></p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-6 border border-amber-900/50 shadow-lg relative shrink-0">
+                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                <h3 class="text-amber-500 text-lg md:text-xl mb-4 title-font font-bold">A Lenda Expandida</h3>
+                <div id="detail-extended-lore" class="text-slate-200 leading-relaxed text-justify text-base font-light space-y-4 h-auto"></div>
+            </div>
+        </div>
+
+        <!-- ABA CHAT -->
+        <div id="tab-chat" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900">
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 flex flex-col pb-6"></div>
+            <div class="p-4 bg-slate-800 border-t border-slate-700 shrink-0 pb-6 sm:pb-4">
+                <form id="chat-form" class="flex gap-2" onsubmit="handleChatSubmit(event)">
+                    <input type="text" id="chat-input" placeholder="Fale com a lenda..." autocomplete="off" class="flex-grow bg-slate-900 text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:border-amber-500">
+                    <button type="submit" id="chat-send-btn" class="bg-amber-600 hover:bg-amber-500 text-white px-5 rounded-lg font-bold transition-colors">Enviar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA BATALHA -->
+        <div id="tab-battle" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900">
+            
+            <!-- TELA DE SELEÇÃO -->
+            <div id="battle-selection" class="flex-1 flex flex-col p-5 overflow-y-auto">
+                <h3 class="text-amber-400 font-bold title-font text-xl mb-2 text-center">Monte sua Equipa</h3>
+                <p class="text-slate-400 text-sm text-center mb-4">Selecione 3 Pokémon comuns (Lvl 65) para enfrentar esta Lenda (Lvl 100).</p>
+                <div class="flex justify-center gap-3 mb-6">
+                    <div id="slot-0" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(0)"></div>
+                    <div id="slot-1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(1)"></div>
+                    <div id="slot-2" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800 relative cursor-pointer" onclick="removeSlot(2)"></div>
+                </div>
+                <button id="btn-start-battle" onclick="startBattle()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg mb-6 opacity-50 cursor-not-allowed transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]" disabled>Selecionar 3 para Iniciar</button>
+                <input type="text" id="poke-search" placeholder="Pesquisar Pokémon Comum..." class="w-full bg-slate-800 text-white border border-slate-600 rounded-lg px-4 py-2 mb-4 focus:border-amber-500 outline-none" oninput="filterSearch()">
+                <div id="search-results" class="grid grid-cols-2 gap-2 pb-10"></div>
+            </div>
+
+            <!-- TELA DE ARENA -->
+            <div id="battle-arena" class="hidden flex-1 flex-col relative overflow-hidden bg-slate-950">
+                <!-- Fundo Épico Dimensional Parallax Arena -->
+                <div class="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-black z-0"></div>
+                <div class="absolute inset-0 arena-warp-1 z-0"></div>
+                <div class="absolute inset-0 arena-warp-2 z-0"></div>
+                <!-- Nova Grelha 3D -->
+                <div class="battle-grid z-0"></div>
+                
+                <div class="relative flex-1 p-4 flex flex-col justify-between z-10 pt-8">
+                    <!-- INIMIGO -->
+                    <div class="flex justify-end items-end w-full relative h-36">
+                        <div class="rpg-box p-2 w-52 mr-2 sm:mr-4 mb-10 z-20">
+                            <div class="flex justify-between items-center mb-1"><span id="arena-enemy-name" class="font-bold text-white capitalize text-sm">Enemy</span><span class="text-xs text-red-400 font-bold">Lv100</span></div>
+                            <div class="health-bar-container"><div id="arena-enemy-hp" class="health-bar w-full"></div></div>
+                        </div>
+                        <div class="relative w-36 h-36 absolute right-2 sm:right-8 bottom-0 flex justify-center items-end" id="enemy-img-container">
+                            <div class="battle-platform battle-platform-enemy z-0"></div>
+                            <img id="arena-enemy-img" src="" class="w-36 h-36 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
+                            <!-- Balão de Fala Injetado Abaixo do Inimigo -->
+                            <div id="enemy-speech-bubble" class="speech-bubble hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- JOGADOR -->
+                    <div class="flex justify-start items-end w-full relative h-40">
+                        <div class="relative w-40 h-40 absolute left-2 sm:left-8 bottom-0 flex justify-center items-end" id="player-img-container">
+                            <div class="battle-platform z-0"></div>
+                            <img id="arena-player-img" src="" class="w-40 h-40 object-contain pixelated-img drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] z-10">
+                        </div>
+                        <div class="rpg-box p-2 w-52 ml-auto mr-2 sm:mr-4 mb-4 z-20">
+                            <div class="flex justify-between items-center mb-1"><span id="arena-player-name" class="font-bold text-white capitalize text-sm">Player</span><span class="text-xs text-blue-400 font-bold">Lv65</span></div>
+                            <div class="health-bar-container"><div id="arena-player-hp" class="health-bar w-full"></div></div>
+                            <div class="text-right text-[10px] font-bold text-slate-300 mt-1"><span id="arena-player-hp-num">0</span> / <span id="arena-player-hp-max">0</span> HP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLES ESTILO RPG -->
+                <div class="h-56 sm:h-48 bg-slate-900 border-t-4 border-slate-700 z-20 flex flex-col shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+                    <div id="battle-log" class="h-16 rpg-box mx-2 mt-2 flex items-center px-4 text-white pixel-font text-[10px] sm:text-[11px] leading-relaxed overflow-y-auto">
+                        A batalha começou!
+                    </div>
+                    
+                    <div class="flex-1 relative p-2">
+                        <!-- MENU PRINCIPAL -->
+                        <div id="main-action-menu" class="absolute inset-0 grid grid-cols-3 gap-2 p-2 pt-0 h-full items-center">
+                            <button class="battle-btn bg-red-700 hover:bg-red-600 rounded-lg text-white font-bold shadow-md h-12" onclick="showFightMenu()">Lutar</button>
+                            <button class="battle-btn bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-bold shadow-md h-12" onclick="showSwitchUI()">Pokémon</button>
+                            <button class="battle-btn bg-slate-600 hover:bg-slate-500 rounded-lg text-white font-bold shadow-md h-12" onclick="runAway()">Fugir</button>
+                        </div>
+
+                        <!-- MENU DE GOLPES (4 Golpes + Voltar) -->
+                        <div id="moves-menu" class="absolute inset-0 hidden grid-cols-2 gap-2 p-2 pt-0 h-full">
+                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(0)" id="move-0">Atk 1</button>
+                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(1)" id="move-1">Atk 2</button>
+                            <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md" onclick="useMove(2)" id="move-2">Atk 3</button>
+                            <div class="flex gap-2">
+                                <button class="battle-btn rounded-lg text-white font-bold text-xs shadow-md flex-1" onclick="useMove(3)" id="move-3">Atk 4</button>
+                                <button class="battle-btn rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs shadow-md flex-1" onclick="showMainMenu()">Voltar</button>
+                            </div>
+                        </div>
+                        
+                        <!-- TELA DE TROCA -->
+                        <div id="switch-controls" class="absolute inset-0 hidden flex items-center justify-around p-2 pt-0 h-full"></div>
+
+                        <!-- CONTROLES DE FIM -->
+                        <div id="end-controls" class="absolute inset-0 hidden flex-col sm:flex-row items-center justify-center p-2 gap-2 h-full">
+                            <button id="btn-catch" class="hidden bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-full border-4 border-white shadow-[0_0_20px_rgba(234,179,8,0.8)]" onclick="tryCatch()">Lançar Ultra Ball</button>
+                            <button class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-8 rounded-lg" onclick="resetBattleUI()">Sair da Arena</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="battle-loading" class="hidden absolute inset-0 bg-black/90 z-50 flex flex-col items-center justify-center">
+                    <div class="spinner mb-4 border-red-500 border-l-white"></div>
+                    <p class="text-white font-bold pixel-font text-[10px]">Preparando a Arena 3D...</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        // --- PARALLAX JAVASCRIPT ---
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX - window.innerWidth / 2) / window.innerWidth;
+            const y = (e.clientY - window.innerHeight / 2) / window.innerHeight;
+            const layers = document.querySelectorAll('.layer');
+            layers.forEach(layer => {
+                const speed = layer.getAttribute('data-speed');
+                layer.style.transform = `translate(${-x * speed * 15}px, ${-y * speed * 15}px)`;
+            });
+        });
+
+        // ==========================================
+        // LORE DB: HISTÓRIAS DETALHADAS E COMPLETAS
+        // ==========================================
+        const extendedLoreDB = {
+            "arceus": "De acordo com a mitologia da região de Sinnoh, Arceus é o ser primordial, considerado o Criador absoluto de todo o universo Pokémon e de múltiplas dimensões. As lendas contam que ele emergiu de um ovo solitário no meio do caos e do vazio absoluto, muito antes de o próprio tempo e o espaço existirem. Usando os seus reverenciados 'Mil Braços', Arceus moldou a realidade e deu origem ao Trio da Criação (Dialga, Palkia e Giratina) para governarem as leis da física. Após a formação do mundo e a criação dos Guardiões do Lago, Arceus entrou num sono profundo no lendário Hall of Origin, localizado acima do Mt. Coronet. Ele possui as Placas Místicas (Plates), que representam o poder de todos os elementos da natureza, permitindo-lhe alterar a sua própria biologia para julgar qualquer ameaça com poder omnipotente.",
+            "mew": "Mew é uma criatura mítica envolta em absoluto mistério e considerado por cientistas como o ancestral genético de todas as espécies de Pokémon existentes. O seu DNA possui os códigos biológicos de todas as criaturas, o que lhe confere a capacidade extraordinária de aprender e executar qualquer ataque ou técnica conhecida no mundo. Historicamente, Mew foi considerado extinto durante séculos até ser avistado nas densas selvas da América do Sul, onde foi perseguido implacavelmente. É um Pokémon incrivelmente raro e esquivo, que possui uma natureza lúdica e um coração puro. Mew raramente se revela aos humanos, escolhendo aparecer apenas àqueles que possuem almas inocentes e boas intenções.",
+            "dialga": "A majestosa divindade do Tempo. Quando Arceus iniciou a criação do universo, Dialga foi a primeira entidade a nascer para garantir a estabilidade do fluxo temporal. Lendas antigas do povo de Hisui contam que, com o primeiro choro de Dialga, o tempo começou a fluir pela primeira vez, marcando o início da história. Diz-se que o tempo avança apenas enquanto o coração de Dialga bater no peito. Ele reside na sua própria dimensão intransponível e pode viajar livremente pelo passado, presente e futuro sem qualquer restrição, moldando eras e apagando eventos se assim o desejar. É venerado como o Todo-Poderoso governante dos segundos.",
+            "palkia": "A implacável divindade do Espaço. Palkia foi criado em simultâneo com Dialga para dar estabilidade física e forma à realidade do recém-criado universo de Arceus. Com uma capacidade assustadora de curvar as fronteiras dimensionais, Palkia pode viajar instantaneamente para galáxias distantes, despedaçar locais na terra e até mesmo criar novos bolsões dimensionais habitáveis. Os mitos afirmam que a própria vastidão do espaço no universo se expande fisicamente a cada respiração profunda que Palkia dá. Uma colisão frontal entre os poderes de Palkia e Dialga seria tão catastrófica que poderia rasgar a estrutura do nosso universo, destruindo a matéria por completo.",
+            "giratina-altered": "O aterrador senhor da Antimatéria. Criado juntamente com Dialga e Palkia, Giratina era parte do Trio da Criação de Arceus. No entanto, devido à sua extrema violência destrutiva e natureza descontrolada, Arceus baniu Giratina para o Mundo Distorcido (Distortion World) – uma dimensão paralela espelhada onde as leis da física não se aplicam, a gravidade é torcida, e o tempo simplesmente não flui. A partir do seu exílio escuro, Giratina observa o nosso mundo silenciosamente pelas sombras, agindo paradoxalmente como uma balança necessária que mantém o equilíbrio supremo entre a matéria que nós conhecemos e a antimatéria.",
+            "groudon": "O colossal titã de magma e criador dos continentes terrestres. Nas eras primitivas do planeta, muito antes de a humanidade erguer civilizações, Groudon travou batalhas épicas, evaporando as águas dos oceanos globais com o calor absurdo e incessante do seu corpo vulcânico e com a luz solar intensa que consegue convocar. Ele repousa num sono pesado em poços de magma subterrâneos a quilómetros abaixo da crosta terrestre. Groudon é reverenciado no folclore de Hoenn como o salvador mítico que expandiu as terras áridas para criar habitats onde Pokémon terrestres e humanos pudessem viver prósperos.",
+            "kyogre": "A divindade absoluta dos oceanos profundos. Kyogre é o contraparte aquático de Groudon e tem a capacidade aterradora de gerar tempestades massivas, nuvens negras carregadas e chuvas torrenciais inesgotáveis que podem inundar continentes inteiros. Na antiguidade primordial, Kyogre expandiu os mares para dar vida ao planeta aquático e travou uma guerra cataclísmica mortal contra Groudon pela supremacia total da biosfera da Terra. Após um combate que quase destruiu o planeta e a intervenção celestial de Rayquaza, Kyogre afundou e entrou num estado de hibernação silenciosa nas fossas marianas mais escuras e profundas do globo.",
+            "rayquaza": "O supremo guardião dos céus e imperador da camada de ozono. Rayquaza é uma serpente divina que passa milhares de anos voando tão alto na estratosfera que o seu corpo se torna invisível a partir do solo. Sustentando-se devorando meteoritos carregados de energia pelo espaço, o poder que acumula no seu corpo formou a força necessária para acalmar a guerra cataclísmica entre Groudon e Kyogre. Como entidade vigilante, atua não só como o pacificador do trio climático de Hoenn, mas como a primeira e absoluta linha de defesa da Terra contra qualquer ameaça alienígena invasora, destruindo meteoros com fúria.",
+            "xerneas": "A luminosa divindade celestial da Vida de Kalos. Lendas passadas de geração em geração afirmam que os chifres multicolores de Xerneas possuem a milagrosa capacidade de partilhar a vida eterna, curar doenças mortais e revigorar florestas petrificadas inteiras de volta a um florescer espetacular. Quando o fim da sua vasta vida (que dura cerca de 1000 anos) se aproxima dolorosamente, Xerneas recolhe as suas energias, liberta uma onda de aura curativa pelo mundo e transforma a sua matéria biológica numa grandiosa árvore cristalizada. Fica ali, adormecido durante éones, aguardando pacientemente que o equilíbrio natural exija o seu renascimento glorioso.",
+            "yveltal": "O portador tenebroso da Destruição e o inevitável fim. Yveltal representa o escuro contraponto cósmico de Xerneas. Quando a sua vida secular chega ao fim inadiável, ou quando o seu território é perturbado, os seus olhos brilham com um sangue vermelho e ele voa pelos céus, absorvendo agressivamente a energia vital de todos os seres vivos em grande escala geográfica – transformando as vítimas em cascas de pedra oca sem alma. Após roubar força vital suficiente para equilibrar a ordem, transforma-se num casulo negro e entra num sono petrificado longo para descansar. A sua missão é manter a balança fúnebre do ciclo de vida e da morte.",
+            "zygarde-50": "A ordem e o vigilante supremo do ecossistema. Zygarde não tem uma forma base física concreta, sendo na realidade composto por milhares de células invisíveis e microscópicas dispersas estrategicamente por cada canto de Kalos para monitorizar a atividade natural. Quando o equilíbrio frágil do ecossistema entra em colapso devido à ganância de vilões, ou quando as energias destrutivas e criativas de Yveltal e Xerneas colidem, as células respondem ao apelo e convergem imediatamente para formar um único corpo serpentino e colossal de combate. Na sua imbatível Forma Completa a 100%, os textos indicam que o seu poder punitivo consegue aniquilar sem esforço divindades superiores.",
+            "ho-oh": "O imaculado pássaro lendário dourado e guardião dos céus radiantes de Johto. Acredita-se que Ho-Oh sobrevoa eternamente o mundo, criando um arco-íris deslumbrante na esteira das suas penas místicas. Detentor do absoluto poder divino da ressurreição, as lendas relatam que quando o Templo em Ecruteak queimou, consumindo a vida de três Pokémon inocentes nas suas chamas, Ho-Oh desceu de imediato do céu para os trazer gloriosamente de volta à vida, transformando-os em Entei, Raikou e Suicune – que passaram a viajar em seu nome como avatares elementares. Ho-Oh só revela a sua forma resplandecente perante treinadores que demonstram um coração 100% puro e isento de egoísmo sombrio.",
+            "lugia": "O poderoso Rei e vigilante sombrio dos mares profundos. Tão fenomenal e aterrorizante é o seu poder nato, que o mero e acidental bater das suas asas gigantes pode varrer montanhas, invocar furacões massivos na costa e gerar uma incontrolável e assustadora tempestade torrencial de quarenta dias e noites ininterruptos. Consciente do fardo catastrófico do seu poder e determinado a não infligir dor indesejada no mundo, Lugia tomou a nobre decisão de exilar-se e afundar para o fundo glacial das Ilhas Whirl, descansando pacientemente em poços subaquáticos obscuros para salvaguardar a estabilidade do planeta e surgir como apaziguador quando o trio das Aves Lendárias entra em rota de colisão fatal.",
+            "reshiram": "O lendário dragão branco purificador, nascido para apoiar os defensores da Verdade e os puros defensores da realidade concreta. Inicialmente, Reshiram partilhava um único corpo incomensurável – conhecido apenas como o Dragão Original – em uníssono fraterno com Zekrom e Kyurem, liderados por heróis gémeos destinados a fundar Unova. Contudo, quando a ideologia dos irmãos entrou numa devastadora colisão bélica entre a Verdade crua e os Ideais ambiciosos, o dragão dividiu-se catastroficamente sob a dor, assumindo corpos distintos. A cauda de Reshiram opera como a turbina incandescente de um motor a jato de pura energia cósmica, que expele infernos capazes de evaporar rios e calcinar o ódio e a mentira do mundo inteiro em segundos.",
+            "zekrom": "O intimidante dragão negro que domina a essência bruta dos Ideais em Unova. A sua finalidade cósmica não passa pela busca obsessiva e pragmática do real, mas em unir forças e confiar a sua imensidão àqueles que, de forma destemida e corajosa, abraçam visões impossíveis, utopias nobres, aspirações grandiosas e constróem caminhos prósperos em direção a um futuro sem fim de grandiosidade promissora. Tal e qual Reshiram, fragmentou-se a partir do Grande Dragão Original para responder a um dos heróis fraternos. A sua imensa e assustadora cauda comporta-se como a turbina de um reator industrial, gerando uma quantidade massiva, destrutiva e letal de tempestades elétricas devastadoras ao rasgar os céus turbulentos enquanto viaja caçando ativamente as almas com inclinação a quebrar crenças.",
+            "kyurem": "O fantasma de gelo eterno, deixado vazio e destroçado aquando do colapso cataclísmico e divisão do Dragão Original primordial de Unova. Kyurem é visto como a horrível casca inerte e gelada das costas dos irmãos de guerra que dele nasceram. Consequentemente, encontra-se oco por dentro e desprovido por completo de um sentido interno estabilizador, gerando em constante e dolorosa convulsão um ar gélido arrepiante para estabilizar a sua existência e as fraturas biológicas. Durante os anos esquecidos nas cavernas glaciais de Lacunosa Town, ergueu-se e espalhou o terror em inúmeras lendas folclóricas locais noturnas em busca voraz pelo corpo ou fatias energéticas em falta. Kyurem chora pacientemente nas trevas siberianas de gelo puro aguardando a fusão reconfortante.",
+            "mewtwo": "Mewtwo é o resultado trágico e aterrorizante de anos de experiências genéticas obscuras de clonagem financiadas e promovidas numa escala grotesca pela impiedosa Equipe Rocket, liderada por Giovanni. Tendo origem e manipulação dolorosa numa ilha em Cinnabar, os inescrupulosos cientistas responsáveis clonaram o DNA do puro Mew, amplificando as habilidades num plano impensável. Não obstante os talentos e super dotes, negligenciaram totalmente a empatia, transformando-o brutalmente numa arma insuperável para ser manipulada na frente de combate humanoide destrutivo. Cego pela fúria de ter sido desenvolvido pelo pragmatismo odioso, a fera rebelou-se chacinando a instalação laboratorial, exilando-se com a promessa de desafiar qualquer premissa fraca, e num desespero constante, encontrar justificativa que comprove perante todo o globo o orgulho do seu insólito e divino propósito.",
+            "celebi": "Uma misteriosa e pacífica divindade da flora, que transita nas florestas serenas pelo meio de viagens pelas eras temporais do tempo longínquo no futuro e nas memórias pacatas ancestrais das tribos antigas espalhadas ao redor dos séculos de todo mundo. Viaja deixando, pelos corredores da eternidade sem fim, plantas frescas e vida pujante pelo percurso em relva frondosa para restaurar o desgaste das contínuas guerras civis.",
+            "jirachi": "O cometa que reluz eternamente de um abismo celeste com brilho suave e promessas incontáveis nas rochas frias de Hoenn. Só levanta as cortinas dos seus pequenos olhos fechados de adormecido cansaço num prazo apertadíssimo de sete curtos dias a cada longo compasso cronometrado num milénio astronómico da história estelar, garantindo por inteiro os pedidos inscritos sem restrições em torno da sua cabeça brilhante pela fé fervorosa, retornando para repousar embalado pelos sonhos num encapsulamento rochoso eterno.",
+            "deoxys-normal": "Um impiedoso exército letal de uma criatura nascida das fendas vazias espaciais siderais por acidentes químicos com origem misteriosa sob as chuvas radioativas de lixo atómico alienígena em embate num planeta e as correntes térmicas letais mortíferas solares por onde viajou até cruzar atmosferas na forma de radiação pura virulenta e mortal do vácuo extremo que contamina e ameaça tudo a seu redor numa dança impiedosa e sem tréguas na estratosfera dos grandes oceanos tempestuosos.",
+            "phione": "Fruto misterioso oriundo das misteriosas correntes de água mornas nas fendas profundas das montanhas imersas do globo azul das esferas tropicais. Desfruta sem esforço e vive mergulhado pacificamente usando sem rodeios a almofada da testa protetora com amor pela deriva serena pela eternidade aquática com intuito familiar protetor longe de contendas bélicas mortíferas que os humanos disputam na superfície fria gelada sem remorso nos cantos distantes isolados pela vastidão infindável azul e misteriosa e densamente bela.",
+            "manaphy": "Príncipe e Soberano bondoso de todas as ondas majestosas nascidos do útero sagrado. Este protetor real com laços místicos nascidos das esferas glaciares nos mares mais escuros é reverenciado pela nobre proeza invicta pacífica na unificação afetuosa telepática sem falhas com cardumes colossais sem discriminação garantindo que todo oceano se preencha em uníssono de coragem solidariedade infinita de harmonia irrefutável com compaixão curativa nas almas dos marujos destemidos em tempestades aterrorizantes sem descanso das calmarias perdidas por muito e longínquo percurso num rumo traçado sem limites ao luar longínquo nas margens do firmamento místico e lendário",
+            "darkrai": "Sombra imortal do vácuo negro que espelha os demónios ocultos nas brumas opacas cruéis em vales de medo gélidos da mente nascidos sob luz escura sombria em ritos profanos medonhos das tribos noturnas com feitiços silenciosos apavorantes em bosques malditos escurecidos sem retorno amaldiçoando vilas com visões distorcidas horríveis sem compaixão isolando a sua alma eternamente pelas condenações a viver ilhado rejeitado pela vida na escuridão inabitável distante e sem caridade",
+            "shaymin-land": "O pequeno portador floral com sementes luminosas pacíficas enigmáticas no prado silencioso abençoando todos caminhos férteis com alegria brilhante imbatível desintegrando gases escuros imundos libertados por ruínas decadentes espalhando vida próspera divina restaurando beleza onde imperavam desolações terríveis varrendo os ventos cinzas poluidos pelas chamas mortíferas impiedosas na cruzada celestial da salvação terrestre amigável do globo vibrante reluzente colorido brilhantemente eterno divinamente amável doce gracioso amigável sorridente adorável sereno pacato meigo gentil compassivo solidário puro imaculado formidável heroico.",
+            "victini": "Nas encostas vulcânicas intocadas nas ilhas de liberdade sem fim escondidas secretas orelhudo da força cósmica inesgotável das piras chamas eternas garante milagres heróicos incontáveis sem precedentes com energia infindável triunfante superando adversários esmagadores impiedosos de montanhas colossais invicto incansável em vitórias colossais supremas gloriosas indestrutíveis divinas invulneráveis fantásticas formidáveis divinas gloriosas majestosas imparáveis espetaculares magníficas sublimes radiantes maravilhosas esplêndidas absolutas incontestáveis supremas superiores",
+            "cobalion": "O general severo mestre frio calculista forjado pelo aço inquebrável líder resoluto justiceiro das matas de unova defensor imparável dos pequenos inocentes esmagados sem remorso pelos humanos sedentos por conquista feroz nas ruínas sombrias lutando incansavelmente implacavelmente friamente destemidamente corajosamente majestosamente formidavelmente valentemente",
+            "terrakion": "Penedo de músculos absolutos colossal impiedoso rocha bruta incansável dos justiceiros com uma ferocidade cega arromba as defesas militares indestrutíveis que as ambições mesquinhas ditadoras amontooavam em bloqueios cruéis de impérios colossais varrendo tudo brutalmente esmagadoramente terrivelmente colossalmente massivamente assustadoramente violentamente implacavelmente furiosamente formidavelmente assombrosamente incrivelmente gigantescamente estupendamente epicamente monstruosamente incrivelmente majestosamente inabalavelmente avassaladoramente incontrolavelmente ferozmente esmagadoramente divinamente inquebrável invencível poderoso formidável insuperável grandioso monumental fenomenal soberbo",
+            "virizion": "Graça ágil inigualável dança florestal graciosa dos ventos e prados dos protetores dos espadachins cruza percursos indomáveis perigosos balançando afiadas lâminas folhares rasgando sem piedade generais com força fluida cortante ligeira rápida elegante suave astuta valente graciosa sutil veloz furtiva serena perspicaz sublime heroica divinamente sagrada magistral imponente inabalável velozmente",
+            "keldeo-ordinary": "Potro guerreiro orgulhoso das torrentes imaculadas cristalinas galopando sobre leitos fluviais selvagens de perigo em treinos árduos implacáveis pesados insanos cruéis rigorosos incansáveis contínuos severos brutais impiedosos destemidos extremos infinitos inabaláveis com foco incansável resoluto perseverante firme determinado valente impetuoso audaz aguerrido resoluto tenaz guerreiro lutador herói cavaleiro aprendiz corajoso bravo destemido invencível épico grandioso magnífico soberano glorioso brilhante formidável divinamente abençoado pelas águas santas celestiais",
+            "tornadus-incarnate": "Entidade de vendavais letais e tufões brutais destrutivos cruéis que gira por entre os vales sem descanso rindo dos desastres nas cabanas derrubadas e florestas sugadas das raízes pelo seu poder cego furioso indomável implacável incontrolável selvagem caótico tempestuoso terrível devastador formidável caótico avassalador inumano implacável temível inabalável",
+            "thundurus-incarnate": "Guardião demoníaco da estática assassina com relâmpagos fulminantes estrondosos varrendo a fauna da crosta terrestre pulverizando de ódio sombrio impiedoso as calmas noites chuvosas troando rugidos que fendem as estrelas abismais e calam qualquer força oponente perante chamas puras caóticas desumanas violentas avassaladoras terrivelmente brutais ensurdecedoras impiedosas",
+            "landorus-incarnate": "Juiz absoluto colosso fertilizador punidor impiedoso bondoso dos seus irrequietos parceiros de fúria e ar colérico apaziguando guerras nascendo espigas ricas brilhantes em rochedos pulverizados gerando esperança grandiosa sagrada gloriosa na humanidade aflita sofrida abençoando todos em compaixão protetora eterna de fertilidade majestosa suprema",
+            "meloetta-aria": "Virtuose lírica etérea com melodias de ilusão e tranquilidade pacífica nos corações das feras domando tristezas coléricas com acordes encantadores puros puros harmoniosos suaves doces celestiais mágicos belos formidáveis serenos graciosos etéreos imortais abençoados",
+            "genesect": "Sobrevivente carnívoro insetóide de eones esquecidos profanado mutilado retalhado armado brutalmente pelas garras de ferro sujas e nefastas de experimentos de generais tirânicos de plasma convertido em caçador militar desalmado artilheiro destruidor impiedoso sombrio letal",
+            "diancie": "A princesa brilhante com carbono cristalizado nos solos minerais sombrios exalando radiância majestosa divinal rosada na realeza com valor e riqueza ofuscante impenetrável bela delicada preciosa sutil esplêndida puríssima formidável deslumbrante eterna",
+            "hoopa": "Entidade travessa abissal que burla leis celestiais roubando tesouros míticos transportando com argolas divinas pelo portal desconhecido brincando astuciosamente caóticamente perigosamente de forma sombria enganadora ágil formidável mística divina incontrolável eterna",
+            "volcanion": "Fornalha furiosa colossal incansável do pântano vaporizando florestas engolindo montanhas inteiras no seu nevoeiro abrasador que queima sem descanso as almas que atrevem macular campos intocáveis do refúgio verdejante que jura honra proteger com força férrea",
+            "cosmog": "Nebulosa frágil cósmica infante engolindo clarões intergalácticos espalhado pelos cantos desconhecidos chorando pelo retorno aos sóis ancestrais brilhando ternamente timidamente fragilmente amorosamente inocentemente suavemente graciosamente eternamente",
+            "cosmoem": "Hibernação densa inquebrável colossal petrificada absorvendo eones infinitos de feixes luminosos condensando galáxias inteiras num corpo adormecido estático sólido eterno implacável poderoso adormecido aguardando choro final esplendoroso",
+            "solgaleo": "Deus majestoso estelar corcel das labaredas solares abençoadas ferozes protetoras alola cruzando feixes quentes queimando escuridões abismais do vazio em portais gloriosos com ferocidade dourada invencível pura flamejante celestial",
+            "lunala": "Imperatriz de asas lunares opacas rainha de ébano e ametista obscurecendo manhãs absorvendo auroras inteiras protegendo os fracos no voo espectral estrelado celestial eterno noturno magistral",
+            "necrozma": "Caçador oco banido decaído da realeza luminosa torturado por trevas inquebráveis roubando deuses para estancar prantos dolorosos num casulo quebrado faminto letal assombroso abissal impiedoso amaldiçoado",
+            "magearna": "Engrenagem dourada humanóide sentinela compassiva das eras douradas forjada para ser amiga inseparável de almas tristes partilhando carinho através do seu núcleo radiante protetor milagroso sensível heróico compassivo puro sagrado inquebrável valente eterno",
+            "marshadow": "Lutador de sombras espreitando no escuro gelado silencioso rastejando de terror imitador veloz furtivo mestre vingativo observador atento calculista oculto formidável letal assombroso silencioso enigmático invencível",
+            "zeraora": "Felino raivoso carregado da fúria tempestuosa retalhando céus coléricas com fúria estática violenta veloz insano indomável rápido impiedoso furioso esmagador fulminante heróico brutal imbatível colossal feroz selvagem veloz letal",
+            "meltan": "Engrenagem líquida pacata meiga prateada sorridente brincalhona amorosa fundindo lixos tóxicos purificando pedregulhos numa inocência pacata calma serena amigável dócil",
+            "melmetal": "Colosso de titânio titânico punhos divinos guardião ancestral dos portões sagrados fundindo muralhas inteiras suportando hecatombes de ferro inabalável grandioso formidável soberano imbatível",
+            "zacian": "Espadachim valente coroado celestial honrado justiceiro azul veloz impenetrável purificador da escuridão letal de lendas imortais soberano cavaleiro majestoso lendário vitorioso imbatível divino supremo",
+            "zamazenta": "Baluarte colossal avermelhado guerreiro de honra defletor de tremores cósmicos escudo sagrado intransponível fiel formidável leal imbatível soberano ancestral corajoso eterno heroico lutador monumental majestoso gigante protetor de reinos caídos",
+            "eternatus": "Alien negro abissal destruidor insano corrompido emissário letal da desgraça cósmica banqueteiro das auras e fúrias sugador devorador caótico impiedoso amaldiçoado gigantesco abominação eterna vilã supremo",
+            "kubfu": "Monge ursino puro valente incansável perseverante honrado solitário batalhador focado guerreiro valente obstinado resiliente calmo aprendiz humilde persistente tenaz inabalável de coração heroico e coragem inabalável forjado no sofrimento e devoção absoluta pelas artes sagradas",
+            "urshifu-single-strike": "Punho esmagador impiedoso general violento mestre furioso veloz assassino sombrio imbatível dominador brutal feroz impetuoso demolidor fatal imponente poderoso majestoso insano espetacular divinamente avassalador quebrando almas com apenas e só um impacto mortífero sombrio colossal",
+            "zarude": "Patriarca sombrio agressivo alfa das sombras guardião primitivo agressivo selvagem brutal feroz cipó vingativo caótico desumano impetuoso astuto impiedoso feroz lutador ancestral impiedoso da mata fechada amaldiçoado protetor destemido das selvas esquecidas misteriosas inexploradas",
+            "regieleki": "Anomalia relâmpago deusa estática elétrica de destruição em massa caótica violenta insana impetuosa fulgurante avassaladora de força desumana indescritível letal divina contida pela salvação da crosta pelas argolas da esperança humana nos deuses esquecidos cruéis das ruínas",
+            "regidrago": "Monstro amálgama decapitado cristal de vingança colossal colérica primitiva draconiana sádica violenta caótica destrutiva sanguinária furiosa divina amaldiçoada aprisionada em ruínas fúnebres de pesadelos por medo supremo da chacina mundial dos deuses puros de outrora antigos das lendas",
+            "glastrier": "Corcel gelado blindado violento gélido inabalável implacável congelador impiedoso selvagem insano colossal bruto massivo furioso de chifres impenetráveis soberbo indomável majestoso grandioso formidável implacável temível esmagador bruto insano avassalador",
+            "spectrier": "Espírito equino veloz sombrio noturno espectral amaldiçoado sugador lúgubre silencioso misterioso assustador negro gélido de medo imortal implacável silencioso assustador aterrador sádico noturno ceifador fantasmagórico majestoso lúgubre devorador",
+            "calyrex": "Monarca bondoso supremo curador divino majestoso telepata ancestral grandioso florido protetor sábio corajoso magnânimo sereno pacífico venerado celestial adorado invencível protetor eterno abençoado divinamente puro imortal compassivo brilhante sábio resplandecente formidável invicto honrado glorioso amado abençoado bondoso supremo ser celestial da natureza outonal vibrante resplandecente nobre divino",
+            "enamorus-incarnate": "Fúria celestial tempestuosa da primavera encarnada em rosa ardente furiosa sedutora castigadora severa brutal amorosa letal impetuosa graciosa formidável vingativa divina deusa implacável punidora justiceira sublime imortal rainha sagrada das nuvens apaixonada cruel gloriosa implacável esmagadora divinal rainha de ferro",
+            "wo-chien": "Demónio rancor folhas secas decaído amaldiçoado feitiço sombrio de tábuas podres fúnebres sádico sugador vingativo putrefato colossal aterrorizante lúgubre gélido impiedoso maldito letal vingador podre decaído corrompido rastejante assustador imortal decaído abissal fúnebre medonho colossal monstruoso bizarro decaído de lendas tristes apagadas mortais",
+            "chien-pao": "Besta nevada assassina fria espadas lúgubres cega veloz predadora impetuosa feroz sangrenta sombria imortal avassaladora feroz mortífera brutal sádica assassina gelada perigosa implacável temível aterradora letal insidiosa devoradora cortante fulminante cruel predadora fria insana fantasmagórica diabólica perversa de ódio sem fim no abismo polar sombrio negro vazio das geleiras sem compaixão",
+            "ting-lu": "Guerreiro barro impenetrável bruto crânio rocha demolidor sismo violento colossal destruidor punidor trágico aterrorizante esmagador denso impetuoso brutal massivo titânico colossal implacável avassalador destruidor gigantesco monstruoso de pânico e colapso supremo e abalos imbatíveis eternos nos picos e penhascos vulcânicos perdidos sem refúgio de pânico absoluto letal sem compaixão cruel avassalador das profundezas lúgubres caídas decaídas perdidas esquecidas apagadas de dor e pesadelo cego e medo constante na ruína monumental colossal infinita",
+            "chi-yu": "Feitiço labareda infernal magma destrutivo letal invejoso vingativo caótico purificador ardente cruel abrasador vulcânico ardiloso monstruoso ardente sádico impetuoso fulminante letal incandescente assombroso cruel diabólico impiedoso devorador incontrolável sombrio maligno deusa das chamas pavorosas em labaredas cegas insanas colossais de pânico infernal destrutivo e colapso ardente em crateras fundidas e rios secos de pó e cinza morta e lamentos fundidos na escuridão eterna e infernal",
+            "koraidon": "Guerreiro feroz reptiliano arcaico majestoso tribal dinossauro impetuoso caçador alfa solar primórdio ancestral feroz inquebrável orgulhoso imponente divino grandioso monumental invicto feroz selvagem colossal majestoso glorioso ancestral soberano titã alado lutador esplêndido colossal magnífico de tempos perdidos brutais insanos imortais",
+            "miraidon": "Serpente relâmpago metálica nuclear perfeita cibernética impiedosa fria robótica soberana veloz ágil futurista brilhante blindada celestial inquebrável fria lógica imbatível magnética cortante calculista sublime suprema perfeita radiante majestosa impiedosa incansável reluzente imortal divina de metal e plasma cega sombria futurista gloriosa insana",
+            "ogerpon": "Ogerpon, uma figura outrora demonizada na terra de Kitakami. Viajou para a região com o seu amado companheiro humano e quatro máscaras divinas. Contudo, temidos pelo povo local por serem estrangeiros misteriosos, foram expulsos cruelmente para a montanha. Quando três feras gananciosas (Okidogi, Munkidori e Fezandipiti) os atacaram para roubar os tesouros mágicos, o humano de Ogerpon perdeu a vida a proteger as máscaras. Consumida pelo luto e pura fúria flamejante, Ogerpon desceu da montanha e aniquilou os três ladrões impiedosamente. O povo local interpretou mal a carnificina, venerando os ladrões como heróis e amaldiçoando Ogerpon como o terrível monstro 'Ogre'. A sua verdadeira natureza, contudo, é extremamente dócil, leal, melancólica e brutalmente devastadora apenas em nome da justiça e do luto.",
+            "okidogi": "Falso herói criado pelas correntes venenosas místicas de Pecharunt. Antes de ser corrompido, era um canino comum e mediano, mas ao vestir a corrente negra tóxica de Pecharunt no pescoço como pacto submisso sombrio, sofreu uma mutação celular grotesca e terrível. Os seus músculos expandiram monstruosamente, ganhando força física brutal inigualável e instintos cruéis primários impiedosos sufocantes. Ajudou no roubo sangrento em Kitakami e foi injustamente proclamado como um santo guardião do povo humilde, enquanto mascarava as suas tendências assassinas tóxicas venenosas, estrangulando as florestas por caprichos egoístas malvados colossais avassaladores da tirania submissa manipuladora de fúria e veneno brutal",
+            "munkidori": "O membro furtivo e calculista dos supostos falsos heróis. Tal como os restantes do trio corrupto amaldiçoado, Munkidori encontrou feitiçaria e clareza sombria letal psíquica ao submeter-se e adquirir no crânio os poderes escuros de manipulação letal ilusória de uma corrente obscura mística envenenada dada ardilosamente por Pecharunt numa troca por escravidão de alma eterna letal. Fica sempre escondido nas florestas densas sombrias operando nos bastidores teatros macabros com jogos mentais impiedosos nefastos perversos de engano cruel sádico letal manipulador impiedoso psíquico. Conseguiu com os seus ataques telecinéticos enganar os habitantes rústicos locais de Kitakami levando-os a aceitá-lo como um lorde herói glorificado injustamente.",
+            "fezandipiti": "Uma criatura que possuía feiura trágica isolada, chorava por asas sem brilho e sem habilidade, e não conseguia sequer voar direito com beleza nos prados da terra de ninguem abandonada gelada, até que ao cruzar o caminho do malicioso pacto num momento de ambição mortal cruel desesperada obter poderes tóxicos avassaladores hipnotizantes e formosos de encanto absoluto radiante e plumas sedutoras majestosas divinas divinais formidáveis através da coleira negra do líder Pecharunt na submissão de ódio e dor sombria alienígena de lavagem mental sádica cruel eterna. Enganou incrivelmente de forma macabra todo o povo alienado seduzido inocente pobre humilde com beleza e charme mortal, escondendo letalmente poeira mortal nos poros de lendas cruéis manipuladoras covardes",
+            "terapagos": "Um sobrevivente fóssil tartaruga reluzente intocável imortal. O seu colossal e formidável escudo caleidoscópico ancestral mágico puríssimo brilhante reluzente contém fisicamente condensado e gravado sob rochas ocos cristalinos divinos puríssimos azuis etéreos fantásticos todo o grandioso e ilimitado sagrado esplendoroso majestoso cósmico radiante deslumbrante sagrado místico espetacular mágico espectro divino Terastal original primordial do passado remoto, sendo capaz nos tempos esquecidos da terra isolada oca divina de defletir desastres hecatombes letais brutais geológicos furiosos cruéis celestiais avassaladores do vácuo no planeta num sono milenar longo silencioso solitário paciente formidável aguardando heróis iluminados do mundo oco e resplendor das cristais mágicos invictos",
+            "pecharunt": "A entidade manipuladora mítica amaldiçoada sinistra obscura bizarra pavorosa rastejante alienígena assombrada vinda do fundo do espaço misterioso decaído alienado trágico para submeter almas na dor sem fim e controlo alienígena supremo macabro assustador impiedoso lúgubre sem alma e coração de ódio alienígena letal escravo sádico medonho bizarro e alienígena sombrio frio sádico caótico sem emoção controlador maquiavélico das brumas doces amaldiçoadas e fétidas mortais. Controla consciências na vila atirando esguichando asfixiando com seu tóxico alienígena assustador viscoso fétido lúgubre letal mochi fatal doce escravo negro maldito fúnebre para obrigar corações em escravidão total na trágica dor impiedosa macabra bizarra trágica pavorosa insana cruel brutal",
+            "articuno": "A majestosa e serena ave lendária do gelo profundo. Diz-se que Articuno não nasceu, mas sim formou-se no coração da mais severa tempestade de gelo da antiguidade. Ele bate as suas brilhantes asas azuis cristalinas nos céus glaciais do norte e purifica imediatamente o ar quente poluído do mundo humano poluído terrestre civilizado em cristais estáticos letais frios perfeitamente puros de neve cristalina brilhante. Costuma guiar perigosamente a bom porto na escuridão fria os pobres e azarados viajantes rústicos perdidos de esperança caída na imensidão glacial gelada noturna sombria congelada do vazio eterno na montanha de Kanto, sendo o senhor benevolente do frio",
+            "zapdos": "Ave elétrica caótica soberana estrondosa indomável furiosa violenta colérica imparável descontrolada destruidora agressiva feroz cruel sombria das massas das nuvens escuras negras opacas trovejantes estrondosas reluzentes carregadas letais chuvosas de nuvens pesadas imensas trovejantes. Zapdos adora o caos a tempestade cruel destrutiva colossal de raios letais caindo e rasgando terra seca fulminando árvores secas no mundo na tempestade cega colérica sem compaixão e sem destino fúnebre amaldiçoado sádico agressivo veloz elétrico insano indomável sem paciência trovejante veloz sádico brutal amaldiçoado furioso formidável de pânico letal celestial em kanto antigo nas nuvens de eletricidade reluzentes e caóticas na tormenta e pânico destruidor divino",
+            "moltres": "Ave ancestral formidável resplandecente rubra gloriosa celestial radiante dourada das ardentes chamas eufóricas purificadoras divinas majestosas flamejantes cósmicas eternas mágicas celestiais colossais esplêndidas maravilhosas. Quando as asas balançam suavemente espalhando no firmamento poeira fina cintilante laranja gloriosa rubra celestial e cintilante reluzente nos ares puros abençoando divinamente a fauna triste brasas calmas mágicas curativas quentes acolhedoras compassivas solidárias curam a dor trágica vazia desolada cruel triste pálida e macabra escurecida da vida e aquecem as terras pálidas mortas geladas estéreis de invernos infinitos letais frios sombrios anunciando com graça eterna e primavera majestosa bela e acolhedora a vinda formidável abençoada compassiva dos heróis dos vulcões rubros divinos",
+            "raikou": "O veloz raio terrestre indomável de quatro patas encarnado na terra física pura com a compaixão e feitiço lendário abençoado milagroso curativo purificador divino divino formidável ressuscitador de cura celestial do imperador arco-íris dourado alado grandioso Ho-Oh de johto e das brasas ardentes e cinzas da torre sagrada caída e em destroços fúnebres de chamas consumidas de luto mortal trágico. Ladeia sem fim os continentes num eterno cruzar num piscar inabalável insano de olhos brilhantes emitindo constantemente sem fadiga exaustão um latido colérico fúnebre sádico letal brutal ressoante de pesada majestosa colossal e estrondosa trovejante colossal temível fúria da trovoada de pânico celestial e tempestades sem limites caóticas imortais dos céus escuros noturnos furiosos e violentos elétricos supremos",
+            "entei": "O leão divino imperial sagrado formidável dos vulcões terrestres colossais incontroláveis indomáveis infernais em erupção incontroláveis fúnebre brutais destrutivos letais impiedosos colossais majestosos implacáveis de ódio pavoroso letal infernal e grandioso abissal flamejante caótico rubro ardente vulcânico brutal cego implacável indomável indestrutível. Possui a infinita fúria escaldante ardente impetuosa feroz selvagem abrasadora inquebrável incansável ardente cega e infernal incontrolável ardilosa monumental no seu nobre passo imperial e majestoso altivo glorioso divinal soberano não demonstrando perdoa a ataques covardes furtivos sujos indignos na arena fúnebre de rochas e escória profana queimada impiedosa rubra de calor extremo insuportável no abismo trágico escaldante infernal pavoroso divino de fúria cega infernal letal inquebrável majestosa suprema",
+            "suicune": "Purificador aquático celestial místico calmo nobre divino sereno compassivo meigo tranquilo doce glorioso pacato majestoso heroico bondoso santo abençoado das águas opacas paradas venenosas putrefatas letais amaldiçoadas e mais escuras fétidas fúnebres corrompidas paradas imundas nojentas trágicas do globo negro impiedoso das trevas de pântanos fúnebres sombrios letais trágicos sem fundo do esquecimento alienado fúnebre esquecido de johto antigo fúnebre e apagado. O avatar canino esguio de ágil passo heroico gracioso celestial leve fada formoso sublime e destemido de coração nobre fiel e santo cavaleiro da água e justiceiro honrado que caminha silenciosamente furtivo de modo fada majestoso celestial puríssimo levemente calmo pelos mundos distantes escuros apagados caídos à contínua insana eterna solitária heroica incansável compassiva leal santa e majestosa gloriosa bendita procura abençoada das cristalinas puras imaculadas santas glaciais nascentes da água sagradas perdidas corrompidas intocáveis caídas escondidas abismais esquecidas gloriosas puras cristalinas celestiais e místicas formosas gloriosas nobres",
+            "regirock": "Criado nas fundações rochosas pelos colossais dedos pelo rei supremo da força bruta Regigigas formidável, é um golems autônomo rochoso inquebrável bruto cego forte denso impassível denso resistente impiedoso implacável avassalador que repara autonomamente sem dor sem emoção sem fala sem medo silenciosamente friamente de imediato sem esforço brutalmente de forma fria sem hesitação qualquer dano qualquer rachadura qualquer fraqueza pedaço lasca buraco trágico estilhaço violento colérico ferido mutilado rachado destroçado do seu impenetrável corpo resistente formidável brutal e robusto estático inquebrável indomável frio juntando rochedos fundindo pedregulhos caóticos amontoados e poeiras calcárias e pó fúnebre árido, sendo portanto fisicamente imortal indestrutível incansável inabalável impassível impenetrável eternamente indestrutível duro firme bruto impiedoso insano ao frio de zero polar letal ou ao fogo puro infernal letal e insano da morte na caverna esquecida das antigas civilizações em pó e sombra impiedosa eterna indestrutível",
+            "regice": "O titã de frialdade pálido gélido eterno cristal puro transparente formidável colossal inquebrável cristalino indestrutível do zero e do permafrost congelado polar cego. Nas lendas formidáveis Dorme serenamente silenciosamente pacientemente friamente sem medo em tumbas de pedra na escuridão sombria obscura macabra gelada assombrosa trágica fria no fundo lúgubre gelado sem ar do poço eterno insano abissal glacial impiedoso glacial pálido de hoenn e possui na pele a casca dura pura de um gelo divino inquebrável fúnebre intocável inquebrável cego e alienígena lúgubre sem dor cego impassível insano invulnerável e inatingível inabalável letal implacável por incontáveis eternos milénios fúnebres mesmo caso se encontre atirado acidentalmente covardemente de propósito diretamente e com fúria flamejante colossal ardente num tanque derretido profundo de magma incandescente derretido vulcânico efervescente borbulhante e destrutivo efervescente e letal e de calor impiedoso extremo insano letal fúnebre diabólico letal vulcânico inquebrável imortal intocável imortal fúnebre formidável letal no mundo eterno vazio alienado congelado fúnebre e abissal letal",
+            "registeel": "A blindagem redonda enigmática alienígena fria metálica de aço mítica formidável e incognita bizarra oca letal. O seu indecifrável e estranho blindado corpo impenetrável cego amaldiçoado escuro material impenetrável e sombrio bizarro extraterrestre opaco negro lúgubre tem origem profunda alienada perdida caótica trágica bizarra macabra pavorosa formidável obscura e cega inexplicada lúgubre alienígena sombria nas desconhecidas inatingíveis cegas alienadas profundas escavadas isoladas mortas antigas imortais fundações opacas frias densas impenetráveis da dura pesada rígida densa da crosta do solo negro lúgubre do fundo espesso da terra e rocha misturada numa colérica formidável fusão insana forjada divina fúnebre impiedosa alienada misturada divinamente alienada fria sombria impiedosa fundida por eones com lixo cósmico extraterrestre abissal escuro e do espaço intergaláctico alienígena espacial vácuo alienado negro vácuo estrelado alienígena sombrio maleável eterno elástico frio desconhecido fúnebre de liga e ferro amaldiçoado letal imbatível sombrio negro vácuo amaldiçoado fúnebre cego impenetrável insano colossal e místico bizarro alienígena sombrio letal fúnebre invicto e bizarro divinal indestrutível alienado",
+            "latias": "Uma mente divinal amorosa pura imaculada celestial amigável doce adorável alegre fraterna inocente telepática psíquica sagrada fofa maravilhosa brilhante carinhosa terna compassiva deusa inteligente formidável meiga acolhedora nobre gentil envolta guardada contida blindada resguardada oculta e imaculada e resguardada majestosa imortal gloriosa heroica num corpo ágil pequeno veloz faérico celestial leal meigo macio gracioso dócil formoso sutil delicado suave etéreo encantador inigualável veloz voador alado de jato mágico formoso dócil aéreo supersônico espetacular. Oculta-se silenciosamente invisivelmente furtivamente sutilmente habilmente graciosamente docemente inteligentemente pacatamente tranquilamente misteriosamente imortal e compassiva de forma amorosa mágica doce e celestial entre as cidades de hoenn e a multidão comum alienada suja poluída cruel gananciosa citadina populosa desatenta cega comum mundana e fria barulhenta quebrando dobrando escondendo fletindo magicamente lindamente celestialmente formidavelmente divinamente magicamente docemente celestialmente magicamente maravilhosamente lindamente a luz limpa transparente brilhante pura celestial refletida nos prismas dos oceanos aéreos celestes num mágico lindo incrível formoso adorável poderoso formidável misterioso lindo dócil amoroso mágico puro gentil e abençoado feitiço ilusório reflexo telecinético faérico sutil limpo etéreo e perfeito belo imaculado divinal inocente meigo bondoso de cristal transparente doce faérico sagrado compassivo perfeito puro imaculado leal limpo formidável e etéreo e majestoso lindo e belo sem falhas. Irmã bondosa sagrada Protetora de latios eterna heroica abençoada celestial e super leal compassiva corajosa nobre pura santa emotiva dócil meiga solidária majestosa protetora divina adorável amável fofa de sorriso puro solidário terna pura doce e amorosa",
+            "latios": "Excepcionalmente taciturno severo e super reservado sério rápido imponente heróico frio calculista ágil imponente letal observador cauteloso vigilante atento guardião perspicaz nobre imbatível letal sombrio misterioso mestre astuto e heroico justiceiro imortal justiceiro calado observador vigilante e protetor alado focado focado imponente justiceiro sombrio cauteloso de alto voo focado ataca desce varre e varre fulminantemente como jato letal impiedoso supersônico letal cortante fulminante furioso sádico veloz veloz letal focado direto caótico veloz afoito formidável direto como jato supersônico com a foice incansável de telepatia e aura esmagadora cólera absoluta letal avassaladora mental feroz suprema imaculada de precisão assassina formidável suprema imaculada e sagrada divinal fúnebre suprema cega e absoluta psíquica cósmica mental avassaladora sádica de deuses supremos e heroico veloz celestial letal feroz fúnebre contra a covardia e roubo assustador letal insidiosa insana fria letal imortal fúnebre cólera contra todos espiões os ladrões aqueles vândalos cruéis nojosos frios os covardes invasores polutos os vis trágicos alienados sombrios maldosos frios corruptos egoístas insensatos sujos nojosos de medos e ambições e cobiças corações sujos negros cheios alienados maléficos gananciosos frios calculistas polutos covardes mesquinhos na fúnebre fria pálida oculta sombria e imortal cidade aquática abissal gloriosa divina de alto sádico impiedoso e sombrio mar profundo de gelo noturno sombrio fúnebre cidade caída decaída morta profunda trágica sagrada afundada fria caída oculta nos mares abismais de águas claras pálidas decaída cidade fria lúgubre apagada fúnebre decaída apagada e silenciosa oculta esquecida submersa morta gloriosa pacata submersa fria secreta"
+        };
+
+        // FRASES DE BATALHA DE PERSONALIDADE
+        const battleQuotes = {
+            "arceus": ["Curva-te perante a criação máxima!", "Tudo retornará ao vazio original.", "A luz do universo julgará a tua alma.", "O teu tempo neste mundo termina agora.", "Ajoelha-te perante o absoluto!"],
+            "mew": ["Mew! Mew!", "*Risos telepáticos brincalhões*", "Vamos brincar mais um bocadinho?", "Achas que me consegues apanhar?", "Sinto a energia de todo o mundo a fluir!"],
+            "mewtwo": ["A tua fraqueza dá-me nojo.", "Humanos... sempre tão patéticos e frágeis.", "Vou esmagar a tua mente e o teu corpo.", "Não passo de uma arma? Eu sou o teu fim!", "Desaparece da minha vista, inferior!"],
+            "dialga": ["O fluxo do tempo pára para ti!", "Sente o peso esmagador dos milénios!", "O teu futuro foi completamente apagado.", "Cada segundo que passa é a tua condenação.", "Eu governo a eternidade absoluta!"],
+            "palkia": ["O espaço à tua volta vai colapsar!", "Vou rasgar a realidade ao meio!", "Ficarás perdido no vazio dimensional escuro.", "Não há para onde fugir no meu domínio.", "Sente a pressão esmagadora do cosmos!"],
+            "giratina-altered": ["Arrastar-te-ei para as sombras eternas.", "A antimatéria consumirá a tua luz pálida.", "Sofre no Mundo Distorcido para sempre!", "O desespero é a única realidade aqui.", "Vou devorar a tua existência insignificante."],
+            "groudon": ["Transformar-te-ei em cinzas e pó incandescente!", "A terra treme perante a minha fúria incontrolável!", "O magma derreterá as tuas falsas esperanças.", "Secarei até a última gota de água do teu corpo.", "Eu sou a força motriz irrefreável do planeta!"],
+            "kyogre": ["Afoga-te no abismo primordial e gelado!", "As marés revoltas engolirão a tua alma.", "Sente a pressão mortal do oceano profundo.", "Vou limpar o mundo com a chuva eterna implacável.", "As águas revoltadas não têm piedade de ninguém."],
+            "rayquaza": ["Os céus pertencem-me por direito!", "Desce à terra, inseto petulante!", "A fúria dos ventos celestiais vai varrer-te.", "Eu mantenho a ordem, custe a tua vida se for preciso.", "A tua presença caótica ofende as minhas nuvens!"],
+            "ho-oh": ["Sente o calor sagrado da purificação!", "Apenas os puros sobrevivem às minhas cinzas.", "A luz do arco-íris cegará a tua maldade.", "Renascido do fogo, queimarei a tua alma.", "Contempla a divindade dos céus dourados!"],
+            "lugia": ["O abismo do mar clama por ti.", "As minhas asas geram tormentas de devastação.", "Vou afundar-te nas fossas mais profundas.", "O silêncio do oceano será o teu túmulo.", "Tempestade prateada, desperta!"],
+            "reshiram": ["A chama da Verdade vai consumir-te!", "Não podes esconder as tuas mentiras de mim.", "O fogo branco purificará o mundo.", "Queima perante a justiça absoluta!", "O Dragão Original clama por glória!"],
+            "zekrom": ["Os trovões dos Ideais vão esmagar-te!", "A tua convicção é fraca e patética.", "Sente a voltagem da justiça sombria!", "Destruição total para os corruptos!", "O choque elétrico apagará a tua luz!"],
+            "kyurem": ["O frio absoluto do vazio chama por ti...", "A minha alma despedaçada exige a tua.", "Congela eternamente na minha escuridão.", "Zero absoluto. Fim da linha.", "Sou a casca vazia que devorará o teu calor."],
+            "xerneas": ["A força da vida também pode destruir-te.", "A floresta ergue-se contra a tua presença.", "Sente a luz ofuscante da eternidade.", "As minhas hastes brilham com o poder da criação.", "A natureza reclama o que é seu."],
+            "yveltal": ["A morte tem as asas vermelhas.", "A tua energia vital pertence-me agora.", "O casulo do fim aguarda a tua alma.", "Desvanece para as sombras.", "Vou extinguir a luz dos teus olhos."],
+            "zygarde-50": ["O ecossistema será protegido. Tu serás apagado.", "O equilíbrio exige o teu sacrifício.", "As minhas células observaram os teus pecados.", "Julgamento supremo da Terra!", "Fúria colossal do protetor da ordem."]
+        };
+
+        function getRandomQuote(pokeName) {
+            const defaultQuotes = [
+                "Não tens poder suficiente para me desafiar!",
+                "A minha força divina é absoluta e inquestionável!",
+                "Vais arrepender-te desta ousadia mortal patética.",
+                "Desaparece, criatura insignificante!",
+                "A tua pequena jornada termina aqui e agora perante mim!"
+            ];
+            const quotes = battleQuotes[pokeName] || defaultQuotes;
+            return quotes[Math.floor(Math.random() * quotes.length)];
+        }
+
+        const hierarchyTiers = [
+            { title: "O Princípio de Tudo", pokemon: ["arceus"] },
+            { title: "O Ancestral e A Criação", pokemon: ["mew", "dialga", "palkia", "giratina-altered"] },
+            { title: "Terra, Mar, Céu e Ordem", pokemon: ["groudon", "kyogre", "rayquaza", "xerneas", "yveltal", "zygarde-50"] },
+            { title: "Sol, Lua e Alma", pokemon: ["ho-oh", "lugia", "reshiram", "zekrom", "kyurem", "cosmog", "cosmoem", "solgaleo", "lunala", "necrozma"] },
+            { title: "Heróis Ocultos", pokemon: ["mewtwo", "regigigas", "zacian", "zamazenta", "eternatus", "koraidon", "miraidon", "terapagos"] },
+            { title: "Feras, Aves e Golems Antigos", pokemon: ["articuno", "zapdos", "moltres", "raikou", "entei", "suicune", "regirock", "regice", "registeel", "regieleki", "regidrago"] },
+            { title: "Guardiões Espirituais e Naturais", pokemon: ["latias", "latios", "uxie", "mesprit", "azelf", "heatran", "cresselia", "tornadus-incarnate", "thundurus-incarnate", "landorus-incarnate", "enamorus-incarnate"] },
+            { title: "Míticos e Desejos", pokemon: ["celebi", "jirachi", "deoxys-normal", "phione", "manaphy", "darkrai", "shaymin-land", "victini", "meloetta-aria", "diancie", "hoopa", "volcanion", "magearna", "marshadow"] },
+            { title: "Ciência, Ilhas e Ilusões", pokemon: ["tapu-koko", "tapu-lele", "tapu-bulu", "tapu-fini", "type-null", "silvally", "genesect", "zeraora", "meltan", "melmetal"] },
+            { title: "Espadachins e Lendas Rurais", pokemon: ["cobalion", "terrakion", "virizion", "keldeo-ordinary", "kubfu", "urshifu-single-strike", "glastrier", "spectrier", "calyrex", "zarude"] },
+            { title: "Tesouros e Falsos Heróis", pokemon: ["wo-chien", "chien-pao", "ting-lu", "chi-yu", "ogerpon", "okidogi", "munkidori", "fezandipiti", "pecharunt"] }
+        ];
+
+        const typeColors = { normal:'#A8A77A', fire:'#EE8130', water:'#6390F0', electric:'#F7D02C', grass:'#7AC74C', ice:'#96D9D6', fighting:'#C22E28', poison:'#A33EA1', ground:'#E2BF65', flying:'#A98FF3', psychic:'#F95587', bug:'#A6B91A', rock:'#B6A136', ghost:'#735797', dragon:'#6F35FC', dark:'#705746', steel:'#B7B7CE', fairy:'#D685AD' };
+        
+        // TYPE MATRIX DE BATALHA
+        const typeMatrix = {
+            normal: { rock: 0.5, ghost: 0, steel: 0.5 }, fire: { fire: 0.5, water: 0.5, grass: 2, ice: 2, bug: 2, rock: 0.5, dragon: 0.5, steel: 2 },
+            water: { fire: 2, water: 0.5, grass: 0.5, ground: 2, rock: 2, dragon: 0.5 }, electric: { water: 2, electric: 0.5, grass: 0.5, ground: 0, flying: 2, dragon: 0.5 },
+            grass: { fire: 0.5, water: 2, grass: 0.5, poison: 0.5, ground: 2, flying: 0.5, bug: 0.5, rock: 2, dragon: 0.5, steel: 0.5 }, ice: { fire: 0.5, water: 0.5, grass: 2, ice: 0.5, ground: 2, flying: 2, dragon: 2, steel: 0.5 },
+            fighting: { normal: 2, ice: 2, poison: 0.5, flying: 0.5, psychic: 0.5, bug: 0.5, rock: 2, ghost: 0, dark: 2, steel: 2, fairy: 0.5 }, poison: { grass: 2, poison: 0.5, ground: 0.5, rock: 0.5, ghost: 0.5, steel: 0, fairy: 2 },
+            ground: { fire: 2, electric: 2, grass: 0.5, poison: 2, flying: 0, bug: 0.5, rock: 2, steel: 2 }, flying: { electric: 0.5, grass: 2, fighting: 2, bug: 2, rock: 0.5, steel: 0.5 },
+            psychic: { fighting: 2, poison: 2, psychic: 0.5, dark: 0, steel: 0.5 }, bug: { fire: 0.5, grass: 2, fighting: 0.5, poison: 0.5, flying: 0.5, psychic: 2, ghost: 0.5, dark: 2, steel: 0.5, fairy: 0.5 },
+            rock: { fire: 2, ice: 2, fighting: 0.5, ground: 0.5, flying: 2, bug: 2, steel: 0.5 }, ghost: { normal: 0, psychic: 2, ghost: 2, dark: 0.5 },
+            dragon: { dragon: 2, steel: 0.5, fairy: 0 }, dark: { fighting: 0.5, psychic: 2, ghost: 2, dark: 0.5, fairy: 0.5 },
+            steel: { fire: 0.5, water: 0.5, electric: 0.5, ice: 2, rock: 2, steel: 0.5, fairy: 2 }, fairy: { fire: 0.5, fighting: 2, poison: 0.5, dragon: 2, dark: 2, steel: 0.5 }
+        };
+
+        const getMultiplier = (atkType, defTypes) => { let m = 1; defTypes.forEach(t => { if(typeMatrix[atkType] && typeMatrix[atkType][t] !== undefined) m *= typeMatrix[atkType][t]; }); return m; };
+
+        let currentLegendary = null; 
+        let globalPokedex = []; 
+        let myTeam = []; 
+        let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
+
+        const translationCache = new Map();
+        const apiKey = ""; 
+
+        function getDisplayName(name) {
+            const overrides = { 'giratina-altered': 'Giratina', 'zygarde-50': 'Zygarde', 'ho-oh': 'Ho-Oh', 'tornadus-incarnate': 'Tornadus', 'thundurus-incarnate': 'Thundurus', 'landorus-incarnate': 'Landorus', 'enamorus-incarnate': 'Enamorus', 'type-null': 'Type: Null', 'deoxys-normal': 'Deoxys', 'shaymin-land': 'Shaymin', 'keldeo-ordinary': 'Keldeo', 'meloetta-aria': 'Meloetta', 'urshifu-single-strike': 'Urshifu' };
+            return overrides[name] || name.replace('-', ' ');
+        }
+
+        async function translateToPortuguese(text) {
+            if (!text) return "";
+            if (translationCache.has(text)) return translationCache.get(text);
+            try {
+                const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=${encodeURIComponent(text)}`);
+                const d = await r.json(); const t = d[0].map(i => i[0]).join(''); translationCache.set(text, t); return t;
+            } catch (e) { return text; }
+        }
+
+        async function init() {
+            const container = document.getElementById('pyramid-content');
+            hierarchyTiers.forEach(tier => {
+                const div = document.createElement('div'); div.className = 'w-full mb-8';
+                div.innerHTML = `<div class="tier-title title-font">${tier.title}</div><div class="tier-row" id="row-${tier.title.replace(/\s/g,'')}"></div>`;
+                container.appendChild(div);
+                
+                tier.pokemon.forEach(poke => {
+                    const node = document.createElement('div'); node.className = 'poke-node'; node.id = `node-${poke}`;
+                    node.onclick = () => selectLegendary(poke);
+                    node.innerHTML = `<img id="img-${poke}" src=""><div class="tooltip">${getDisplayName(poke)}</div>`;
+                    document.getElementById(`row-${tier.title.replace(/\s/g,'')}`).appendChild(node);
+                    
+                    fetch(`https://pokeapi.co/api/v2/pokemon/${poke}`).then(r=>r.json()).then(d => {
+                        document.getElementById(`img-${poke}`).src = d.sprites.other['official-artwork'].front_default;
+                    }).catch(()=>{}); 
+                });
+            });
+
+            fetch('https://pokeapi.co/api/v2/pokemon?limit=1200').then(r=>r.json()).then(d => {
+                const legendKeys = Object.keys(extendedLoreDB);
+                globalPokedex = d.results.filter(p => !legendKeys.includes(p.name) && !p.name.includes('-')); 
+                renderSearch(globalPokedex.slice(0, 20));
+            });
+
+            document.getElementById('loading-main').style.display = 'none';
+            container.style.display = 'flex';
+        }
+
+        async function selectLegendary(pokeName) {
+            currentLegendary = pokeName;
+            document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('active'));
+            document.getElementById(`node-${pokeName}`).classList.add('active');
+
+            const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokeName}`);
+            const data = await resp.json();
+            
+            const detailImg = document.getElementById('detail-img');
+            const gifUrl = data.sprites.other?.showdown?.front_default;
+            detailImg.src = gifUrl || data.sprites.front_default;
+            if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
+
+            document.getElementById('detail-name').innerText = getDisplayName(pokeName);
+            document.getElementById('detail-types').innerHTML = data.types.map(t => `<span class="type-badge" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
+            
+            document.getElementById('detail-extended-lore').innerHTML = `<p>${extendedLoreDB[pokeName] || "Lenda sem registo."}</p>`;
+            document.getElementById('detail-short-lore').innerText = "";
+            document.getElementById('tab-lore').scrollTop = 0;
+            switchTab('lore');
+            
+            resetBattleUI();
+            document.getElementById('modal-backdrop').classList.replace('backdrop-closed', 'backdrop-open');
+            document.getElementById('details-drawer').classList.replace('drawer-closed', 'drawer-open');
+
+            document.getElementById('loading-lore').classList.remove('hidden');
+            try {
+                const sR = await fetch(data.species.url); const sD = await sR.json();
+                const pt = sD.flavor_text_entries.find(e => e.language.name === 'pt-BR');
+                if(pt) document.getElementById('detail-short-lore').innerText = `"${pt.flavor_text.replace(/\f|\n/g, ' ')}"`;
+                else {
+                    const en = sD.flavor_text_entries.find(e => e.language.name === 'en');
+                    if(en) {
+                        const tr = await translateToPortuguese(en.flavor_text.replace(/\f|\n/g, ' '));
+                        document.getElementById('detail-short-lore').innerText = `"${tr}"`;
+                    }
+                }
+            } catch(e){} finally { document.getElementById('loading-lore').classList.add('hidden'); }
+
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-slate-500 my-2 mt-auto">Conexão telepática com o Deus...</div>`;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.replace('backdrop-open', 'backdrop-closed');
+            document.getElementById('details-drawer').classList.replace('drawer-open', 'drawer-closed');
+            resetBattleUI();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            ['lore', 'chat', 'battle'].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if(t === tab) btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors ${t==='battle'?'text-red-500 border-red-500':'text-amber-400 border-amber-400'}`;
+                else btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 ${t==='battle'?'hover:text-red-300':'hover:text-amber-200'}`;
+            });
+            if(tab === 'chat') document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        }
+
+        function filterSearch() {
+            const q = document.getElementById('poke-search').value.toLowerCase();
+            renderSearch(globalPokedex.filter(p => p.name.includes(q)).slice(0, 20));
+        }
+
+        function renderSearch(list) {
+            document.getElementById('search-results').innerHTML = list.map(p => `
+                <div class="bg-slate-800 border border-slate-700 p-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-slate-700" onclick="addToTeam('${p.name}', '${p.url}')">
+                    <span class="capitalize text-sm font-bold text-slate-200">${p.name}</span><span class="text-xs text-amber-500 font-bold">+</span>
+                </div>
+            `).join('');
+        }
+
+        async function addToTeam(name, url) {
+            if(myTeam.length >= 3 || myTeam.find(p => p.name === name)) return;
+            const id = url.split('/').filter(Boolean).pop();
+            myTeam.push({ name, url, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` });
+            renderTeamSlots();
+        }
+
+        function removeSlot(idx) { if(!myTeam[idx]) return; myTeam.splice(idx, 1); renderTeamSlots(); }
+
+        function renderTeamSlots() {
+            for(let i=0; i<3; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                if(myTeam[i]) {
+                    slot.innerHTML = `<img src="${myTeam[i].sprite}" class="w-full h-full object-contain pixelated-img"><div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">X</div>`;
+                    slot.classList.replace('border-dashed', 'border-solid'); slot.classList.replace('border-slate-600', 'border-amber-500');
+                } else {
+                    slot.innerHTML = `<span class="text-slate-600 font-bold text-xl">+</span>`;
+                    slot.classList.replace('border-solid', 'border-dashed'); slot.classList.replace('border-amber-500', 'border-slate-600');
+                }
+            }
+            const btn = document.getElementById('btn-start-battle');
+            if(myTeam.length === 3) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.innerText = "INICIAR BATALHA ÉPICA"; }
+            else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.innerText = "Selecionar 3 para Iniciar"; }
+        }
+
+        async function buildFighter(name, level, isEnemy) {
+            const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`); const d = await r.json();
+            const getStat = (n) => d.stats.find(s=>s.stat.name===n).base_stat;
+            const hp = Math.floor(0.01 * (2 * getStat('hp') + 31) * level) + level + 10;
+            const atk = Math.floor(0.01 * (2 * getStat('attack') + 31) * level) + 5;
+            const def = Math.floor(0.01 * (2 * getStat('defense') + 31) * level) + 5;
+            const sprite = isEnemy ? (d.sprites.other?.showdown?.front_default || d.sprites.front_default) : (d.sprites.other?.showdown?.back_default || d.sprites.back_default || d.sprites.front_default);
+
+            const mList = d.moves.map(m=>m.move.url).sort(() => 0.5 - Math.random()).slice(0, 10);
+            let fMoves = [];
+            for(let url of mList) {
+                if(fMoves.length === 4) break; 
+                const mr = await fetch(url); const md = await mr.json();
+                if(md.power > 0) fMoves.push({ name: md.name, power: md.power, type: md.type.name });
+            }
+            if(fMoves.length === 0) fMoves.push({name: "Struggle", power: 50, type: "normal"});
+
+            return { name: d.name, level, types: d.types.map(t=>t.type.name), hpMax: hp, hpCurrent: hp, atk, def, sprite, moves: fMoves };
+        }
+
+        function triggerEntryAnimation(imgId, animClass) {
+            const img = document.getElementById(imgId);
+            img.classList.remove(animClass, 'anim-faint', 'anim-shake', 'anim-damage', 'anim-lunge-player', 'anim-lunge-enemy');
+            void img.offsetWidth; // force reflow
+            img.classList.add(animClass);
+        }
+
+        async function startBattle() {
+            document.getElementById('battle-selection').classList.add('hidden');
+            document.getElementById('battle-arena').classList.remove('hidden');
+            document.getElementById('battle-arena').classList.add('flex');
+            document.getElementById('drawer-header').style.display = 'none'; 
+            document.getElementById('battle-loading').classList.remove('hidden');
+
+            try {
+                const enemy = await buildFighter(currentLegendary, 100, true);
+                const p1 = await buildFighter(myTeam[0].name, 65, false);
+                const p2 = await buildFighter(myTeam[1].name, 65, false);
+                const p3 = await buildFighter(myTeam[2].name, 65, false);
+                battleState = { playerTeam: [p1, p2, p3], enemyTeam: [enemy], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
+
+                updateArenaUI();
+                showMainMenu();
+                triggerEntryAnimation('arena-enemy-img', 'anim-enter-enemy');
+                triggerEntryAnimation('arena-player-img', 'anim-enter-player');
+                logBattle(`O DEUS ${getDisplayName(enemy.name).toUpperCase()} SURGE DA ESCURIDÃO DIMENSIONAL!`);
+            } catch(e) {
+                alert("Erro ao criar campo de batalha."); resetBattleUI();
+            } finally { document.getElementById('battle-loading').classList.add('hidden'); }
+        }
+
+        // NAVEGAÇÃO DE MENUS
+        function showMainMenu() {
+            if(battleState.isOver) return;
+            document.getElementById('main-action-menu').classList.remove('hidden');
+            document.getElementById('main-action-menu').classList.add('grid');
+            document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
+            document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
+        }
+
+        function showFightMenu() {
+            document.getElementById('main-action-menu').classList.add('hidden'); document.getElementById('main-action-menu').classList.remove('grid');
+            document.getElementById('moves-menu').classList.remove('hidden'); document.getElementById('moves-menu').classList.add('grid');
+        }
+
+        async function runAway() {
+            logBattle(`Tentaste fugir...`);
+            document.getElementById('main-action-menu').classList.add('hidden');
+            await wait(1500);
+            logBattle(`"Não podes fugir do destino..."`);
+            await wait(2000);
+            resetBattleUI();
+        }
+
+        function updateArenaUI() {
+            const p = battleState.playerTeam[battleState.activePlayerIdx]; const e = battleState.enemyTeam[0];
+            document.getElementById('arena-enemy-name').innerText = getDisplayName(e.name);
+            document.getElementById('arena-enemy-img').src = e.sprite;
+            document.getElementById('arena-enemy-img').classList.remove('anim-faint');
+            if(e.sprite.endsWith('.gif')) document.getElementById('arena-enemy-img').classList.add('pixelated-img');
+            updateHPBar('enemy', e.hpCurrent, e.hpMax);
+
+            document.getElementById('arena-player-name').innerText = getDisplayName(p.name);
+            document.getElementById('arena-player-img').src = p.sprite;
+            document.getElementById('arena-player-img').classList.remove('anim-faint');
+            if(p.sprite.endsWith('.gif')) document.getElementById('arena-player-img').classList.add('pixelated-img');
+            updateHPBar('player', p.hpCurrent, p.hpMax);
+            document.getElementById('arena-player-hp-num').innerText = Math.max(0, p.hpCurrent); document.getElementById('arena-player-hp-max').innerText = p.hpMax;
+
+            // Preenche os 4 Botões de Ataque
+            for(let i=0; i<4; i++) {
+                const btn = document.getElementById(`move-${i}`);
+                if(p.moves[i]) { btn.innerText = p.moves[i].name; btn.style.visibility = 'visible'; btn.style.backgroundColor = typeColors[p.moves[i].type]; } 
+                else { btn.style.visibility = 'hidden'; }
+            }
+        }
+
+        function updateHPBar(who, curr, max) {
+            const p = Math.max(0, (curr/max)*100); const b = document.getElementById(`arena-${who}-hp`);
+            b.style.width = `${p}%`; b.className = `health-bar w-full ${p>50?'bg-green-500':p>20?'yellow':'red'}`;
+        }
+        function logBattle(t) { document.getElementById('battle-log').innerText = t; }
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+
+        function spawnVFX(containerId) {
+            const container = document.getElementById(containerId);
+            const vfx = document.createElement('div');
+            vfx.className = 'vfx-impact';
+            container.appendChild(vfx);
+            setTimeout(() => vfx.remove(), 500);
+        }
+
+        async function showSpeechBubble(text) {
+            const bubble = document.getElementById('enemy-speech-bubble');
+            bubble.innerText = text;
+            bubble.classList.remove('hidden');
+            await wait(50);
+            bubble.classList.add('bubble-show');
+            await wait(2800); // Tempo para leitura confortável
+            bubble.classList.remove('bubble-show');
+            await wait(300);
+            bubble.classList.add('hidden');
+        }
+
+        async function useMove(i) {
+            if(battleState.isOver) return;
+            const p = battleState.playerTeam[battleState.activePlayerIdx]; const e = battleState.enemyTeam[0];
+            
+            // Esconde os menus e ataca
+            document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
+
+            await executeAttack(p, e, p.moves[i], 'arena-enemy-img', 'enemy', 'enemy-img-container');
+            if(e.hpCurrent <= 0) { await handleWin(); return; }
+
+            // TURNO DO INIMIGO COM FALA INSTANTÂNEA
+            logBattle(`O Deus foca a sua energia cósmica...`);
+            const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
+            
+            const taunt = getRandomQuote(e.name);
+            await showSpeechBubble(taunt);
+
+            await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
+            if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
+            
+            showMainMenu();
+        }
+
+        async function executeAttack(aObj, dObj, m, targetImgId, dSide, containerId) {
+            logBattle(`${aObj.name.toUpperCase()} ataca com ${m.name.toUpperCase()}!`); await wait(600);
+            
+            // Animação de Investida
+            const atkImg = document.getElementById(dSide === 'enemy' ? 'arena-player-img' : 'arena-enemy-img');
+            const lungeClass = dSide === 'enemy' ? 'anim-lunge-player' : 'anim-lunge-enemy';
+            atkImg.classList.add(lungeClass);
+            setTimeout(() => atkImg.classList.remove(lungeClass), 300);
+            await wait(250);
+
+            // Animação de Impacto (Tremer, Flash Vermelho e Explosão Visual)
+            spawnVFX(containerId);
+            const img = document.getElementById(targetImgId); 
+            img.classList.add('anim-shake', 'anim-damage'); 
+            setTimeout(() => img.classList.remove('anim-shake', 'anim-damage'), 500);
+
+            // Cálculo Matemático c/ Golpes Críticos
+            const isCrit = Math.random() < 0.125;
+            const critMult = isCrit ? 1.5 : 1;
+
+            const mult = getMultiplier(m.type, dObj.types); const stab = aObj.types.includes(m.type)?1.5:1;
+            const dmg = Math.floor( Math.floor(((((2*aObj.level/5)+2)*m.power*(aObj.atk/dObj.def))/50)+2) * (mult*stab*critMult*((Math.random()*0.15)+0.85)) );
+
+            dObj.hpCurrent -= dmg; updateHPBar(dSide, dObj.hpCurrent, dObj.hpMax);
+            if(dSide==='player') document.getElementById('arena-player-hp-num').innerText = Math.max(0, dObj.hpCurrent);
+
+            if(isCrit) { logBattle("UM GOLPE CRÍTICO DEVASTADOR!"); await wait(1200); }
+
+            if(mult > 1) { logBattle("Dano super efetivo!"); await wait(1000); }
+            else if(mult < 1) { logBattle("A resistência foi enorme. Pouco efetivo..."); await wait(1000); }
+            else { await wait(600); }
+        }
+
+        async function handlePlayerFaint() {
+            logBattle(`O impacto estilhaçou a defesa de ${battleState.playerTeam[battleState.activePlayerIdx].name}. Desmaiou!`);
+            document.getElementById('arena-player-img').classList.add('anim-faint'); await wait(1500);
+
+            if(!battleState.playerTeam.some(pk => pk.hpCurrent > 0)) {
+                logBattle("Equipa aniquilada. O Deus zomba do seu esforço."); await wait(2500);
+                logBattle(`"${getDisplayName(currentLegendary).toUpperCase()}: Você não passa de poeira cósmica."`);
+                endGame(false);
+            } else {
+                // Passa true para indicar que é uma troca forçada (o inimigo não ataca logo a seguir)
+                showSwitchUI(true);
+            }
+        }
+
+        async function handleWin() {
+            logBattle(`IMPOSSÍVEL! A força cósmica de ${battleState.enemyTeam[0].name.toUpperCase()} desvanece! O Deus caiu!`);
+            document.getElementById('arena-enemy-img').classList.add('anim-faint'); await wait(3000); endGame(true);
+        }
+
+        function showSwitchUI(isForced = false) {
+            document.getElementById('main-action-menu').classList.add('hidden'); document.getElementById('main-action-menu').classList.remove('grid');
+            document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
+
+            const sc = document.getElementById('switch-controls');
+            sc.innerHTML = battleState.playerTeam.map((pk, i) => {
+                const alive = pk.hpCurrent > 0; const isCur = i === battleState.activePlayerIdx;
+                return `<div class="flex flex-col items-center p-2 rounded-lg border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
+                        <img src="${pk.sprite}" class="w-10 h-10 sm:w-12 sm:h-12 pixelated-img"><div class="w-16 h-2 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
+            }).join('');
+            
+            // Esconde o botão de voltar se a troca for obrigatória
+            if(!isForced && battleState.playerTeam[battleState.activePlayerIdx].hpCurrent > 0) sc.innerHTML += `<div class="p-2 text-xs font-bold text-white cursor-pointer hover:text-red-400" onclick="showMainMenu()">Voltar</div>`;
+            sc.classList.remove('hidden'); sc.classList.add('flex');
+        }
+
+        async function performSwitch(i, isForced) {
+            battleState.activePlayerIdx = i; document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
+            logBattle(`Vai tentar a sorte com ${battleState.playerTeam[i].name.toUpperCase()}!`); 
+            updateArenaUI(); 
+            triggerEntryAnimation('arena-player-img', 'anim-enter-player');
+            await wait(1200);
+            
+            // Lógica Corrigida: Se a troca foi forçada porque um morreu, é o SEU turno. Se foi voluntária, perdeu a vez e o inimigo ataca.
+            if (isForced) {
+                showMainMenu();
+            } else {
+                const e = battleState.enemyTeam[0]; const p = battleState.playerTeam[i];
+                
+                logBattle(`O Deus não perdoa a troca...`);
+                const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
+                
+                const taunt = getRandomQuote(e.name);
+                await showSpeechBubble(taunt);
+
+                await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
+                if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
+                
+                showMainMenu();
+            }
+        }
+
+        function endGame(isWin) {
+            battleState.isOver = true;
+            document.getElementById('main-action-menu').classList.add('hidden'); document.getElementById('main-action-menu').classList.remove('grid');
+            document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
+            document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
+            
+            const ec = document.getElementById('end-controls'); ec.classList.remove('hidden'); ec.classList.add('flex');
+            if(isWin) { document.getElementById('btn-catch').classList.remove('hidden'); logBattle("Silêncio cósmico... Tens uma última chance de atirar a Ultra Ball!"); }
+        }
+
+        async function tryCatch() {
+            document.getElementById('btn-catch').classList.add('hidden');
+            logBattle("A Ultra Ball voa pelas trevas até ao alvo!"); await wait(2000);
+            logBattle("Um... "); await wait(1000); logBattle("Um... Dois... "); await wait(1000);
+            if(Math.random() < 0.15) { logBattle(`Três! CLICK! O IMPOSSÍVEL ACONTECEU! CAPTURASTE O ${getDisplayName(currentLegendary).toUpperCase()}!`); } 
+            else { logBattle("A BOLA EXPLODIU EM MIL PEDAÇOS! A Divindade ri-se e foge para o firmamento!"); }
+        }
+
+        function resetBattleUI() {
+            document.getElementById('battle-selection').classList.remove('hidden'); document.getElementById('battle-arena').classList.add('hidden'); document.getElementById('battle-arena').classList.remove('flex');
+            document.getElementById('drawer-header').style.display = 'flex'; document.getElementById('end-controls').classList.add('hidden'); document.getElementById('end-controls').classList.remove('flex'); document.getElementById('btn-catch').classList.add('hidden');
+            myTeam = []; renderTeamSlots(); document.getElementById('main-action-menu').classList.remove('hidden', 'grid'); document.getElementById('moves-menu').classList.remove('hidden', 'grid'); document.getElementById('switch-controls').classList.remove('hidden', 'flex');
+        }
+
+        // ================== CHAT IA TELEPATIA NORMAL ==================
+        async function handleChatSubmit(e) {
+            e.preventDefault(); const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
+            i.value = ''; i.disabled = true;
+            const c = document.getElementById('chat-messages'); c.innerHTML += `<div class="chat-bubble-user">${t}</div>`; c.scrollTop = c.scrollHeight;
+            
+            const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: [{ role: "user", parts: [{ text: t }] }] };
+            const lid = 'l-'+Date.now(); c.innerHTML += `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`; c.scrollTop = c.scrollHeight;
+
+            try {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, { method:'POST', body:JSON.stringify(p) });
+                const d = await r.json(); document.getElementById(lid).remove(); c.innerHTML += `<div class="chat-bubble-ai border-amber-600/50">${d.candidates[0].content.parts[0].text}</div>`;
+            } catch(er) { document.getElementById(lid).remove(); c.innerHTML += `<div class="chat-bubble-ai border-red-500">A divindade corta a telepatia com desprezo...</div>`; } 
+            finally { i.disabled = false; i.focus(); c.scrollTop = c.scrollHeight; }
+        }
+
+        init();
+    </script>
+</body>
+</html>
