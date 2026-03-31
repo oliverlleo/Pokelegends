@@ -275,7 +275,13 @@
                 <img id="detail-img" src="" alt="Pokemon" class="w-36 h-36 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer" onclick="animateDetailImg()">
             </div>
             <div class="text-center relative z-10">
-                <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
+                <div class="flex items-center justify-center gap-2 mb-2 relative">
+                <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest title-font drop-shadow-lg">Nome</h2>
+                <button id="btn-mega" class="hidden w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border-2 border-slate-600 hover:border-amber-400 transition-colors relative group" onclick="toggleMegaEvolution()" title="Mega Evoluir">
+                    <span class="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 drop-shadow-sm">MEGA</span>
+                </button>
+                <div id="mega-options-menu" class="hidden absolute top-full mt-2 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 flex flex-col overflow-hidden min-w-[120px]"></div>
+            </div>
                 <div id="detail-types" class="flex justify-center gap-2"></div>
                 <button id="btn-play-cry" onclick="playCry(currentCries?.latest)" class="mt-3 mx-auto bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-600/50 rounded-full px-4 py-1 text-xs uppercase font-bold flex items-center gap-2 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -285,6 +291,7 @@
                 </button>
             </div>
             <div class="flex w-full px-4 mt-4 gap-2 shrink-0">
+                <button onclick="switchTab('evolution')" id="tab-btn-evolution" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-cyan-300">Evolução</button>
                 <button onclick="switchTab('lore')" id="tab-btn-lore" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors text-amber-400 border-amber-400">História</button>
                 <button onclick="switchTab('chat')" id="tab-btn-chat" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-amber-200">Telepatia</button>
                 <button onclick="switchTab('battle')" id="tab-btn-battle" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-red-300">Batalha</button>
@@ -499,6 +506,23 @@
                     <p class="text-white font-bold pixel-font text-[10px]">Preparando a Arena 3D...</p>
                 </div>
             </div>
+        </div>
+
+
+        <!-- ABA EVOLUÇÃO -->
+        <div id="tab-evolution" class="tab-content flex-1 overflow-y-auto p-5 pb-32 space-y-6 bg-slate-900 hidden">
+            <div class="text-center mb-6">
+                <h3 class="text-cyan-400 text-lg md:text-xl font-bold uppercase tracking-widest title-font drop-shadow-md">Linha Evolutiva</h3>
+                <p class="text-slate-400 text-sm font-light mt-1">Registos de metamorfose desta entidade</p>
+            </div>
+            <div id="evolution-loading" class="hidden flex-col items-center justify-center py-10">
+                <div class="spinner mb-4 w-8 h-8 border-2" style="border-right-color: #22d3ee;"></div>
+                <span class="text-cyan-400/80 text-sm">Analisando DNA...</span>
+            </div>
+            <div id="evolution-empty" class="hidden text-center text-slate-500 italic py-10">
+                Nenhuma linha evolutiva encontrada.
+            </div>
+            <div id="evolution-chain-container" class="flex flex-col items-center gap-6 py-4"></div>
         </div>
 
         <!-- ABA TCG -->
@@ -726,6 +750,8 @@
         const tcgState = { byPokemonId: {}, loading: {} };
         let currentCries = null;
         let currentChatHistory = [];
+
+
         let globalPokedex = []; 
         let legendariesList = Object.keys(extendedLoreDB);
         let myTeam = [];
@@ -868,7 +894,227 @@
             container.style.display = 'flex';
         }
 
-                async function selectLegendary(pokeName) {
+
+        let currentMegaOptions = [];
+        let isMegaEvolved = false;
+        let baseFormGif = '';
+        let baseFormLore = '';
+        let baseFormName = '';
+
+        async function loadEvolutionChain(speciesUrl) {
+            const container = document.getElementById('evolution-chain-container');
+            const loading = document.getElementById('evolution-loading');
+            const empty = document.getElementById('evolution-empty');
+
+            container.innerHTML = '';
+            empty.classList.add('hidden');
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+
+            try {
+                // Fetch species to get evolution chain url
+                const speciesRes = await fetch(speciesUrl);
+                const speciesData = await speciesRes.json();
+
+                if (!speciesData.evolution_chain) {
+                    loading.classList.remove('flex');
+                    loading.classList.add('hidden');
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                // Fetch evolution chain
+                const chainRes = await fetch(speciesData.evolution_chain.url);
+                const chainData = await chainRes.json();
+
+                let chain = [];
+                let currentStage = chainData.chain;
+
+                // Helper to flatten chain
+                function traverseChain(node) {
+                    let stages = [node.species.name];
+                    if (node.evolves_to && node.evolves_to.length > 0) {
+                        // For branch evolutions like Eevee, we simplify by just taking the first path for now,
+                        // or we can collect all branches. Let's do all branches simply.
+                        for(let i=0; i<node.evolves_to.length; i++) {
+                             traverseChain(node.evolves_to[i]);
+                        }
+                    }
+                }
+
+                // Better approach to handle linear/branch paths:
+                const extractEvolutions = (node) => {
+                    const evolutions = [];
+                    evolutions.push(node.species.name);
+
+                    if(node.evolves_to.length > 0) {
+                       // Just taking the first line to keep it simple and clean vertically
+                       evolutions.push(...extractEvolutions(node.evolves_to[0]));
+                    }
+                    return evolutions;
+                };
+
+                const evolutionsList = extractEvolutions(chainData.chain);
+
+                // Fetch basic info for each evolution to get GIFs
+                const evolutionDetails = await Promise.all(evolutionsList.map(async (name) => {
+                    try {
+                        const pRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+                        const pData = await pRes.json();
+                        return {
+                            name: name,
+                            gif: pData.sprites.other?.showdown?.front_default || pData.sprites.front_default,
+                            types: pData.types
+                        };
+                    } catch(e) { return null; }
+                }));
+
+                const validEvolutions = evolutionDetails.filter(e => e !== null);
+
+                if (validEvolutions.length <= 1) {
+                    loading.classList.remove('flex');
+                    loading.classList.add('hidden');
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                // Render
+                let html = '';
+                for(let i=0; i < validEvolutions.length; i++) {
+                    const ev = validEvolutions[i];
+
+                    const typesHtml = ev.types.map(t => `<span class="type-badge text-[10px] py-0.5 px-2" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
+
+                    html += `
+                        <div class="flex flex-col items-center bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-lg relative cursor-pointer hover:bg-slate-700 transition-colors w-full max-w-xs group" onclick="selectLegendary('${ev.name}')">
+                            <div class="absolute inset-0 bg-cyan-500/5 blur-xl group-hover:bg-cyan-500/20 transition-all"></div>
+                            <img src="${ev.gif}" class="w-20 h-20 object-contain z-10 drop-shadow-md mb-2 group-hover:scale-110 transition-transform">
+                            <span class="font-bold text-white capitalize text-sm z-10">${getDisplayName(ev.name)}</span>
+                            <div class="flex gap-1 mt-1 z-10">${typesHtml}</div>
+                        </div>
+                    `;
+
+                    if (i < validEvolutions.length - 1) {
+                        html += `
+                            <div class="text-cyan-400 opacity-70 animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                            </div>
+                        `;
+                    }
+                }
+
+                container.innerHTML = html;
+
+            } catch(e) {
+                console.error("Erro ao carregar evolução:", e);
+                empty.classList.remove('hidden');
+            } finally {
+                loading.classList.remove('flex');
+                loading.classList.add('hidden');
+            }
+        }
+
+
+        async function toggleMegaEvolution(selectedIndex = -1) {
+            const btn = document.getElementById('btn-mega');
+            const menu = document.getElementById('mega-options-menu');
+            const img = document.getElementById('detail-img');
+            const loreEl = document.getElementById('detail-extended-lore');
+            const loadingLore = document.getElementById('loading-lore');
+            const nameEl = document.getElementById('detail-name');
+
+            if (isMegaEvolved) {
+                // Reverter para forma base
+                img.classList.remove('anim-shake');
+                void img.offsetWidth; // trigger reflow
+                img.classList.add('anim-shake');
+
+                img.src = baseFormGif;
+                loreEl.innerHTML = `<p class="text-slate-300 italic text-sm leading-relaxed whitespace-pre-line">${baseFormLore}</p>`;
+                loreEl.dataset.currentlore = baseFormLore;
+                nameEl.innerText = getDisplayName(baseFormName);
+
+                btn.classList.remove('border-amber-400', 'shadow-[0_0_15px_rgba(251,191,36,0.6)]');
+                menu.classList.add('hidden');
+                isMegaEvolved = false;
+
+                // Reinicia o chat
+                currentChatHistory = [];
+                document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-slate-500 my-2 mt-auto">Conexão telepática restaurada com o ${getDisplayName(baseFormName).toUpperCase()}...</div>`;
+                return;
+            }
+
+            if (currentMegaOptions.length > 1 && selectedIndex === -1) {
+                // Mostrar opções
+                if (menu.classList.contains('hidden')) {
+                    menu.innerHTML = currentMegaOptions.map((opt, idx) => {
+                        let shortName = opt.pokemon.name.replace(baseFormName + '-mega', 'Mega').replace('-', ' ').toUpperCase();
+                        if(shortName.trim() === 'MEGA') shortName = 'MEGA FORMA';
+                        return `<button onclick="toggleMegaEvolution(${idx})" class="px-4 py-2 text-xs font-bold text-slate-300 hover:bg-amber-500/20 hover:text-amber-400 transition-colors text-left w-full border-b border-slate-700 last:border-0">${shortName}</button>`;
+                    }).join('');
+                    menu.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                }
+                return;
+            }
+
+            // Ativar Mega Evolução
+            menu.classList.add('hidden');
+            const chosenIndex = selectedIndex > -1 ? selectedIndex : 0;
+            const megaDataUrl = currentMegaOptions[chosenIndex].pokemon.url;
+            const megaNameRaw = currentMegaOptions[chosenIndex].pokemon.name;
+
+            try {
+                img.classList.add('opacity-50');
+                btn.classList.add('animate-pulse');
+
+                const res = await fetch(megaDataUrl);
+                const data = await res.json();
+
+                const newGif = data.sprites.other?.showdown?.front_default || data.sprites.front_default;
+
+                // Animação de evolução
+                img.classList.remove('anim-shake');
+                void img.offsetWidth;
+                img.classList.add('anim-shake', 'brightness-200');
+
+                setTimeout(() => {
+                    img.src = newGif;
+                    img.classList.remove('opacity-50', 'brightness-200');
+                    btn.classList.remove('animate-pulse');
+                    btn.classList.add('border-amber-400', 'shadow-[0_0_15px_rgba(251,191,36,0.6)]');
+                }, 400);
+
+                nameEl.innerText = getDisplayName(megaNameRaw);
+
+                // Lore da Mega Evolução
+                const megaCuriosity = `Uma curiosidade: A energia da Mega Evolução força o potencial latente deste Pokémon além de seus limites normais. O poder avassalador transborda, alterando sua forma e elevando seus instintos a um nível primitivo e letal.`;
+                const megaLore = `${baseFormLore}
+
+[REGISTO DE ANOMALIA - MEGA FORMA]
+${megaCuriosity}`;
+
+                loreEl.innerHTML = `<p class="text-slate-300 italic text-sm leading-relaxed whitespace-pre-line text-amber-200">${megaLore}</p>`;
+                loreEl.dataset.currentlore = megaLore;
+
+                isMegaEvolved = true;
+
+                // Reinicia o chat avisando da anomalia
+                currentChatHistory = [];
+                document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-red-400 my-2 mt-auto font-bold animate-pulse">AVISO: Conexão telepática sobrecarregada! Sinais da Mega Evolução detectados...</div>`;
+                switchTab('lore'); // Força a ver a lore nova
+
+            } catch (e) {
+                console.error("Erro na mega evolução", e);
+                img.classList.remove('opacity-50');
+                btn.classList.remove('animate-pulse');
+            }
+        }
+
+        async function selectLegendary(pokeName) {
             currentLegendary = pokeName;
             currentDexNum = null;
             currentCries = null;
@@ -879,11 +1125,24 @@
             const data = await resp.json();
             
             const detailImg = document.getElementById('detail-img');
+
+            // --- MEGA EVOLUTION RESET ---
+            isMegaEvolved = false;
+            currentMegaOptions = [];
+            baseFormName = pokeName;
+            document.getElementById('btn-mega').classList.add('hidden');
+            document.getElementById('mega-options-menu').classList.add('hidden');
+            document.getElementById('btn-mega').classList.remove('border-amber-400', 'shadow-[0_0_15px_rgba(251,191,36,0.6)]');
+            // ----------------------------
+
             currentCries = data.cries;
             playCry(currentCries?.latest);
 
+
             const gifUrl = data.sprites.other?.showdown?.front_default;
-            detailImg.src = gifUrl || data.sprites.front_default;
+            baseFormGif = gifUrl || data.sprites.front_default; // Armazena o GIF base
+            detailImg.src = baseFormGif;
+
             if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
             document.getElementById('detail-name').innerText = getDisplayName(pokeName);
@@ -905,6 +1164,16 @@
             document.getElementById('loading-lore').classList.remove('hidden');
             try {
                 const sR = await fetch(data.species.url); const sD = await sR.json();
+
+                // --- CHECK MEGA VARIETIES ---
+                if (sD.varieties && sD.varieties.length > 1) {
+                    currentMegaOptions = sD.varieties.filter(v => v.pokemon.name.includes('-mega') && !v.pokemon.name.includes('-gmax'));
+                    if (currentMegaOptions.length > 0) {
+                        document.getElementById('btn-mega').classList.remove('hidden');
+                    }
+                }
+                // ----------------------------
+
 
                 // --- FETCH REGION, GEN, POKEDEX ---
                 let genName = "-";
@@ -977,11 +1246,21 @@
                     document.getElementById('detail-extended-lore').innerHTML = `<p class="text-slate-300 italic text-sm leading-relaxed whitespace-pre-line">${combinedLore}</p>`;
                 }
 
+
+                // Armazenar lore base para reverter da mega evolução
+                baseFormLore = extendedLoreDB[pokeName] || combinedLore;
+
                 // Expose combinedLore for the chat prompt
                 document.getElementById('detail-extended-lore').dataset.currentlore = extendedLoreDB[pokeName] || combinedLore;
             } catch(e){} finally { document.getElementById('loading-lore').classList.add('hidden'); }
 
+
+            // Carregar evolução
+            loadEvolutionChain(`https://pokeapi.co/api/v2/pokemon-species/${pokeName}`);
+
             currentChatHistory = [];
+
+
             document.getElementById('chat-messages').innerHTML = `<div class="text-center text-xs text-slate-500 my-2 mt-auto">Conexão telepática com o ${getDisplayName(pokeName).toUpperCase()}...</div>`;
         }
 
@@ -1069,13 +1348,16 @@
             // Manage visibility for non-active tabs since flex-1 might still show them if not properly hidden.
             // In the original they are hidden via .tab-content:not(.active) { display: none; } which is assumed to be in CSS.
 
-            ['lore', 'chat', 'battle', 'tcg'].forEach(t => {
+            ['evolution', 'lore', 'chat', 'battle', 'tcg'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (!btn) return;
 
                 let activeColor = 'text-amber-400 border-amber-400';
                 let inactiveColor = 'hover:text-amber-200';
-                if (t === 'battle') {
+                if (t === 'evolution') {
+                    activeColor = 'text-cyan-400 border-cyan-400';
+                    inactiveColor = 'hover:text-cyan-300';
+                } else if (t === 'battle') {
                     activeColor = 'text-red-500 border-red-500';
                     inactiveColor = 'hover:text-red-300';
                 } else if (t === 'tcg') {
