@@ -152,6 +152,27 @@
             mix-blend-mode: color-dodge;
         }
 
+        /* INFO CARDS ANIMATION */
+        .info-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .info-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            z-index: 10;
+        }
+        .info-card-region:hover { border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
+        .info-card-gen:hover { border-color: #a855f7; box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3); }
+        .info-card-dex:hover { border-color: #ef4444; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3); }
+
+        @keyframes enterUpInfo {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .anim-enter-up {
+            animation: enterUpInfo 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+
         /* BALÃO DE FALA (SPEECH BUBBLE) DO LENDÁRIO */
         .speech-bubble {
             position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
@@ -230,6 +251,32 @@
                 <div id="loading-lore" class="hidden flex items-center gap-3 my-2"><div class="spinner w-5 h-5 border-2"></div><span class="text-slate-400 text-sm">Traduzindo...</span></div>
                 <p id="detail-short-lore" class="text-slate-300 italic text-sm md:text-base font-light"></p>
             </div>
+
+            <!-- INFOS EXTRAS: REGIÃO, GERAÇÃO, POKEDEX -->
+            <div id="detail-extra-info" class="grid grid-cols-3 gap-3 shrink-0">
+                <!-- Região -->
+                <div class="info-card info-card-region flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 border border-slate-700 shadow-md relative overflow-hidden opacity-0">
+                    <div class="absolute inset-0 bg-blue-500/5 blur-xl"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400 mb-1 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider z-10">Região</span>
+                    <span id="detail-region" class="text-sm sm:text-base text-white font-bold capitalize z-10">-</span>
+                </div>
+                <!-- Geração -->
+                <div class="info-card info-card-gen flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 border border-slate-700 shadow-md relative overflow-hidden opacity-0" style="animation-delay: 100ms;">
+                    <div class="absolute inset-0 bg-purple-500/5 blur-xl"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mb-1 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider z-10">Geração</span>
+                    <span id="detail-generation" class="text-sm sm:text-base text-white font-bold uppercase z-10">-</span>
+                </div>
+                <!-- Pokedex -->
+                <div class="info-card info-card-dex flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 border border-slate-700 shadow-md relative overflow-hidden opacity-0" style="animation-delay: 200ms;">
+                    <div class="absolute inset-0 bg-red-500/5 blur-xl"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400 mb-1 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider z-10">Pokédex</span>
+                    <span id="detail-pokedex" class="text-sm sm:text-base text-white font-bold z-10">#000</span>
+                </div>
+            </div>
+
             <div class="bg-slate-800/80 rounded-xl p-6 border border-amber-900/50 shadow-lg relative shrink-0">
                 <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
                 <h3 class="text-amber-500 text-lg md:text-xl mb-4 title-font font-bold">A Lenda Expandida</h3>
@@ -628,7 +675,7 @@
             container.style.display = 'flex';
         }
 
-        async function selectLegendary(pokeName) {
+                async function selectLegendary(pokeName) {
             currentLegendary = pokeName;
             document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('active'));
             document.getElementById(`node-${pokeName}`).classList.add('active');
@@ -647,6 +694,10 @@
             document.getElementById('detail-extended-lore').innerHTML = `<p>${extendedLoreDB[pokeName] || "Lenda sem registo."}</p>`;
             document.getElementById('detail-short-lore').innerText = "";
             document.getElementById('tab-lore').scrollTop = 0;
+
+            // Remove animation classes to restart them later
+            document.querySelectorAll('.info-card').forEach(card => card.classList.remove('anim-enter-up'));
+
             switchTab('lore');
             
             resetBattleUI();
@@ -656,6 +707,35 @@
             document.getElementById('loading-lore').classList.remove('hidden');
             try {
                 const sR = await fetch(data.species.url); const sD = await sR.json();
+
+                // --- FETCH REGION, GEN, POKEDEX ---
+                let genName = "-";
+                let regionName = "-";
+                if(sD.generation) {
+                    genName = sD.generation.name.replace('generation-', 'Gen ').toUpperCase();
+                    try {
+                        const gR = await fetch(sD.generation.url); const gD = await gR.json();
+                        if(gD.main_region) regionName = gD.main_region.name;
+                    } catch(e) {}
+                }
+
+                let dexNum = "-";
+                if(sD.pokedex_numbers && sD.pokedex_numbers.length > 0) {
+                    const natDex = sD.pokedex_numbers.find(d => d.pokedex.name === 'national');
+                    if(natDex) dexNum = `#${String(natDex.entry_number).padStart(3, '0')}`;
+                    else dexNum = `#${String(sD.pokedex_numbers[0].entry_number).padStart(3, '0')}`;
+                }
+
+                document.getElementById('detail-region').innerText = regionName;
+                document.getElementById('detail-generation').innerText = genName;
+                document.getElementById('detail-pokedex').innerText = dexNum;
+
+                // Add animation classes
+                setTimeout(() => {
+                    document.querySelectorAll('.info-card').forEach(card => card.classList.add('anim-enter-up'));
+                }, 100);
+                // ---------------------------------
+
                 const pt = sD.flavor_text_entries.find(e => e.language.name === 'pt-BR');
                 if(pt) document.getElementById('detail-short-lore').innerText = `"${pt.flavor_text.replace(/\f|\n/g, ' ')}"`;
                 else {
