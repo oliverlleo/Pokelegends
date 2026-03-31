@@ -209,7 +209,7 @@
             </button>
             <div class="relative w-full flex justify-center mb-2 mt-4 animate-divine-float">
                 <div class="absolute inset-0 bg-amber-500/10 blur-[30px] rounded-full w-32 h-32 mx-auto top-1/2 -translate-y-1/2"></div>
-                <img id="detail-img" src="" alt="Pokemon" class="w-36 h-36 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
+                <img id="detail-img" src="" alt="Pokemon" class="w-36 h-36 object-contain relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer" onclick="animateDetailImg()">
             </div>
             <div class="text-center relative z-10">
                 <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
@@ -636,13 +636,7 @@
             const data = await resp.json();
             
             const detailImg = document.getElementById('detail-img');
-            let gifUrl = null;
-            if (data.sprites.other?.showdown) {
-                const gifs = Object.values(data.sprites.other.showdown).filter(url => typeof url === 'string' && url.endsWith('.gif'));
-                if (gifs.length > 0) {
-                    gifUrl = gifs[Math.floor(Math.random() * gifs.length)];
-                }
-            }
+            const gifUrl = data.sprites.other?.showdown?.front_default;
             detailImg.src = gifUrl || data.sprites.front_default;
             if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
@@ -991,6 +985,20 @@ checkBattleReady();
 
                     return { name: d.name, level, types: d.types.map(t=>t.type.name), hpMax: hp, hpCurrent: hp, atk, def, sprite, moves: fMoves };
                 }
+
+        function animateDetailImg() {
+            const img = document.getElementById('detail-img');
+            const anims = ['anim-lunge-player', 'anim-lunge-enemy', 'anim-damage', 'anim-shake'];
+            const randomAnim = anims[Math.floor(Math.random() * anims.length)];
+
+            img.classList.remove('anim-lunge-player', 'anim-lunge-enemy', 'anim-damage', 'anim-shake');
+            void img.offsetWidth; // force reflow
+            img.classList.add(randomAnim);
+
+            setTimeout(() => {
+                img.classList.remove(randomAnim);
+            }, 500);
+        }
 
         function triggerEntryAnimation(imgId, animClass) {
             const img = document.getElementById(imgId);
