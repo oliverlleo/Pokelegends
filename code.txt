@@ -51,7 +51,7 @@
         .poke-node:hover { transform: scale(1.15) translateY(-8px); border-color: rgba(251, 191, 36, 0.8); box-shadow: 0 15px 35px rgba(251, 191, 36, 0.2), inset 0 0 20px rgba(251, 191, 36, 0.1); background: rgba(30, 41, 59, 0.8); z-index: 10; }
         .poke-node.active { border-color: #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.7), inset 0 0 15px rgba(251, 191, 36, 0.3); transform: scale(1.1); background: rgba(30, 41, 59, 0.9); z-index: 10; }
         .poke-node img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: all 0.3s ease; }
-        
+
         .tooltip {
             position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
@@ -70,10 +70,10 @@
         .drawer-closed { transform: translateX(100%); }
         .backdrop-open { opacity: 1; pointer-events: auto; }
         .backdrop-closed { opacity: 0; pointer-events: none; }
-        
+
         .chat-bubble-ai { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px 12px 12px 2px; padding: 10px 14px; color: #f8fafc; max-width: 85%; align-self: flex-start; }
         .chat-bubble-user { background-color: #3b82f6; color: white; border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 85%; align-self: flex-end; }
-        
+
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; min-height: 0; }
         .pixelated-img { image-rendering: pixelated; transform: scale(1.5); transform-origin: bottom center; }
@@ -83,7 +83,7 @@
         .health-bar { height: 100%; background-color: #22c55e; transition: width 0.3s ease, background-color 0.3s ease; }
         .health-bar.yellow { background-color: #eab308; }
         .health-bar.red { background-color: #ef4444; }
-        
+
         .battle-btn { transition: transform 0.1s, border-color 0.2s; border: 2px solid transparent; }
         .battle-btn:active { transform: scale(0.95); }
         .battle-btn:hover { border-color: rgba(255,255,255,0.7); }
@@ -98,7 +98,7 @@
         /* PARALLAX DA ARENA DE BATALHA */
         @keyframes warpSpeed { 0% { background-position: 0 0; } 100% { background-position: -500px 1000px; } }
         @keyframes warpSpeedSlow { 0% { background-position: 0 0; } 100% { background-position: -200px 500px; } }
-        
+
         .arena-warp-1 { background: radial-gradient(circle, rgba(99,102,241,0.6) 2px, transparent 2px); background-size: 150px 150px; animation: warpSpeed 8s linear infinite; opacity: 0.5; }
         .arena-warp-2 { background: radial-gradient(circle, rgba(168,85,247,0.4) 3px, transparent 3px); background-size: 250px 250px; animation: warpSpeedSlow 15s linear infinite; opacity: 0.3; }
 
@@ -122,9 +122,9 @@
             background: radial-gradient(circle, rgba(56,189,248,0.5) 0%, rgba(0,0,0,0) 60%);
             box-shadow: 0 0 30px rgba(56,189,248,0.3), inset 0 0 30px rgba(56,189,248,0.3);
         }
-        .battle-platform-enemy { 
-            background: radial-gradient(circle, rgba(239,68,68,0.5) 0%, rgba(0,0,0,0) 60%); 
-            box-shadow: 0 0 30px rgba(239,68,68,0.3), inset 0 0 30px rgba(239,68,68,0.3); 
+        .battle-platform-enemy {
+            background: radial-gradient(circle, rgba(239,68,68,0.5) 0%, rgba(0,0,0,0) 60%);
+            box-shadow: 0 0 30px rgba(239,68,68,0.3), inset 0 0 30px rgba(239,68,68,0.3);
         }
 
         /* VFX DE ATAQUE */
@@ -135,7 +135,7 @@
         @keyframes slideInLeft { 0% {transform: translateX(-150px) scale(0.5); opacity: 0;} 100% {transform: translateX(0) scale(1); opacity: 1;} }
         @keyframes shake { 0%, 100% { transform: translate(0, 0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 0); } 20%, 40%, 60%, 80% { transform: translate(5px, 0); } }
         @keyframes vfxBurst { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; } }
-        
+
         .anim-lunge-player { animation: lungePlayer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-lunge-enemy { animation: lungeEnemy 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-damage { animation: flashDamage 0.5s ease-out; }
@@ -144,9 +144,9 @@
         .anim-shake { animation: shake 0.4s; }
         .anim-faint { transition: all 0.8s ease; transform: translateY(50px); opacity: 0; filter: grayscale(1); }
 
-        .vfx-impact { 
-            position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
-            background: radial-gradient(circle, #fff 0%, #facc15 40%, transparent 80%); 
+        .vfx-impact {
+            position: absolute; top: 50%; left: 50%; width: 120px; height: 120px;
+            background: radial-gradient(circle, #fff 0%, #facc15 40%, transparent 80%);
             border-radius: 50%; pointer-events: none; z-index: 30;
             animation: vfxBurst 0.4s ease-out forwards;
             mix-blend-mode: color-dodge;
@@ -201,7 +201,7 @@
 
     <!-- MENU LATERAL (DRAWER) -->
     <aside id="details-drawer" class="fixed top-0 right-0 h-full max-h-[100dvh] w-full sm:w-[500px] md:w-[600px] border-l border-slate-700 shadow-2xl z-50 flex flex-col drawer-closed transition-transform duration-300 ease-out bg-slate-900">
-        
+
         <!-- CABEÇALHO LATERAL -->
         <div id="drawer-header" class="relative w-full flex flex-col items-center justify-center pt-24 pb-2 bg-slate-900 shrink-0 border-b border-slate-800 transition-all">
             <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-500 text-white rounded-full p-2 transition-all duration-200 z-50 focus:outline-none border border-slate-600">
@@ -214,12 +214,6 @@
             <div class="text-center relative z-10">
                 <h2 id="detail-name" class="text-2xl font-bold text-white capitalize tracking-widest mb-2 title-font drop-shadow-lg">Nome</h2>
                 <div id="detail-types" class="flex justify-center gap-2"></div>
-                <button id="btn-play-cry" onclick="playCry(currentCries?.latest)" class="mt-3 mx-auto bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-600/50 rounded-full px-4 py-1 text-xs uppercase font-bold flex items-center gap-2 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.657 6.343a8 8 0 010 11.314M12 4v16m0 0l-4-4H4a2 2 0 01-2-2V10a2 2 0 012-2h4l4-4z" />
-                    </svg>
-                    Ouvir presença
-                </button>
             </div>
             <div class="flex w-full px-4 mt-4 gap-2 shrink-0">
                 <button onclick="switchTab('lore')" id="tab-btn-lore" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors text-amber-400 border-amber-400">História</button>
@@ -256,7 +250,7 @@
 
         <!-- ABA BATALHA -->
         <div id="tab-battle" class="tab-content flex-1 overflow-hidden flex-col bg-slate-900">
-            
+
             <!-- TELA DE SELEÇÃO DE GOLPES -->
             <div id="move-selection-modal" class="hidden absolute inset-0 z-50 bg-slate-900/95 p-5 overflow-y-auto backdrop-blur-md">
                 <div class="flex justify-between items-center mb-4">
@@ -338,7 +332,7 @@
                 <div class="absolute inset-0 arena-warp-2 z-0"></div>
                 <!-- Nova Grelha 3D -->
                 <div class="battle-grid z-0"></div>
-                
+
                 <div class="relative flex-1 p-4 flex flex-col justify-between z-10 pt-8">
                     <!-- INIMIGO -->
                     <div class="flex justify-end items-end w-full relative h-36">
@@ -373,7 +367,7 @@
                     <div id="battle-log" class="h-16 rpg-box mx-2 mt-2 flex items-center px-4 text-white pixel-font text-[10px] sm:text-[11px] leading-relaxed overflow-y-auto">
                         A batalha começou!
                     </div>
-                    
+
                     <div class="flex-1 relative p-2">
                         <!-- MENU PRINCIPAL -->
                         <div id="main-action-menu" class="absolute inset-0 grid grid-cols-3 gap-2 p-2 pt-0 h-full items-center">
@@ -392,7 +386,7 @@
                                 <button class="battle-btn rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs shadow-md flex-1" onclick="showMainMenu()">Voltar</button>
                             </div>
                         </div>
-                        
+
                         <!-- TELA DE TROCA -->
                         <div id="switch-controls" class="absolute inset-0 hidden flex flex-wrap items-center justify-center gap-2 p-2 pt-0 h-full overflow-y-auto"></div>
 
@@ -560,7 +554,7 @@
         ];
 
         const typeColors = { normal:'#A8A77A', fire:'#EE8130', water:'#6390F0', electric:'#F7D02C', grass:'#7AC74C', ice:'#96D9D6', fighting:'#C22E28', poison:'#A33EA1', ground:'#E2BF65', flying:'#A98FF3', psychic:'#F95587', bug:'#A6B91A', rock:'#B6A136', ghost:'#735797', dragon:'#6F35FC', dark:'#705746', steel:'#B7B7CE', fairy:'#D685AD' };
-        
+
         // TYPE MATRIX DE BATALHA
         const typeMatrix = {
             normal: { rock: 0.5, ghost: 0, steel: 0.5 }, fire: { fire: 0.5, water: 0.5, grass: 2, ice: 2, bug: 2, rock: 0.5, dragon: 0.5, steel: 2 },
@@ -577,9 +571,8 @@
         const getMultiplier = (atkType, defTypes) => { let m = 1; defTypes.forEach(t => { if(typeMatrix[atkType] && typeMatrix[atkType][t] !== undefined) m *= typeMatrix[atkType][t]; }); return m; };
 
         let currentLegendary = null;
-        let currentCries = null;
         let currentChatHistory = [];
-        let globalPokedex = []; 
+        let globalPokedex = [];
         let legendariesList = Object.keys(extendedLoreDB);
         let myTeam = [];
         let currentDifficulty = 'normal';
@@ -588,15 +581,6 @@
         let battleState = { playerTeam: [], enemyTeam: [], activePlayerIdx: 0, activeEnemyIdx: 0, isOver: false };
 
         const translationCache = new Map();
-
-
-        function playCry(url) {
-            if (url) {
-                const audio = new Audio(url);
-                audio.volume = 0.5; // default reasonable volume
-                audio.play().catch(e => console.log("Audio play blocked/failed:", e));
-            }
-        }
 
         function getDisplayName(name) {
             const overrides = { 'giratina-altered': 'Giratina', 'zygarde-50': 'Zygarde', 'ho-oh': 'Ho-Oh', 'tornadus-incarnate': 'Tornadus', 'thundurus-incarnate': 'Thundurus', 'landorus-incarnate': 'Landorus', 'enamorus-incarnate': 'Enamorus', 'type-null': 'Type: Null', 'deoxys-normal': 'Deoxys', 'shaymin-land': 'Shaymin', 'keldeo-ordinary': 'Keldeo', 'meloetta-aria': 'Meloetta', 'urshifu-single-strike': 'Urshifu' };
@@ -622,16 +606,16 @@
                 const div = document.createElement('div'); div.className = 'w-full mb-8';
                 div.innerHTML = `<div class="tier-title title-font">${tier.title}</div><div class="tier-row" id="row-${tier.title.replace(/\s/g,'')}"></div>`;
                 container.appendChild(div);
-                
+
                 tier.pokemon.forEach(poke => {
                     const node = document.createElement('div'); node.className = 'poke-node'; node.id = `node-${poke}`;
                     node.onclick = () => selectLegendary(poke);
                     node.innerHTML = `<img id="img-${poke}" src=""><div class="tooltip">${getDisplayName(poke)}</div>`;
                     document.getElementById(`row-${tier.title.replace(/\s/g,'')}`).appendChild(node);
-                    
+
                     fetch(`https://pokeapi.co/api/v2/pokemon/${poke}`).then(r=>r.json()).then(d => {
                         document.getElementById(`img-${poke}`).src = d.sprites.other['official-artwork'].front_default;
-                    }).catch(()=>{}); 
+                    }).catch(()=>{});
                 });
             });
 
@@ -646,29 +630,25 @@
 
         async function selectLegendary(pokeName) {
             currentLegendary = pokeName;
-            currentCries = null;
             document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('active'));
             document.getElementById(`node-${pokeName}`).classList.add('active');
 
             const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokeName}`);
             const data = await resp.json();
-            
-            const detailImg = document.getElementById('detail-img');
-            currentCries = data.cries;
-            playCry(currentCries?.latest);
 
+            const detailImg = document.getElementById('detail-img');
             const gifUrl = data.sprites.other?.showdown?.front_default;
             detailImg.src = gifUrl || data.sprites.front_default;
             if(detailImg.src.endsWith('.gif')) detailImg.classList.add('pixelated-img'); else detailImg.classList.remove('pixelated-img');
 
             document.getElementById('detail-name').innerText = getDisplayName(pokeName);
             document.getElementById('detail-types').innerHTML = data.types.map(t => `<span class="type-badge" style="background:${typeColors[t.type.name]}">${t.type.name}</span>`).join('');
-            
+
             document.getElementById('detail-extended-lore').innerHTML = `<p>${extendedLoreDB[pokeName] || "Lenda sem registo."}</p>`;
             document.getElementById('detail-short-lore').innerText = "";
             document.getElementById('tab-lore').scrollTop = 0;
             switchTab('lore');
-            
+
             resetBattleUI();
             document.getElementById('modal-backdrop').classList.replace('backdrop-closed', 'backdrop-open');
             document.getElementById('details-drawer').classList.replace('drawer-closed', 'drawer-open');
@@ -1017,14 +997,6 @@ checkBattleReady();
             void img.offsetWidth; // force reflow
             img.classList.add(randomAnim);
 
-            // Secret event 5% chance
-            if (Math.random() < 0.05) {
-                playCry(currentCries?.legacy);
-                spawnVFX('drawer-header', '#fbbf24');
-            } else {
-                playCry(currentCries?.latest);
-            }
-
             setTimeout(() => {
                 img.classList.remove(randomAnim);
             }, 500);
@@ -1041,7 +1013,7 @@ checkBattleReady();
             document.getElementById('battle-selection').classList.add('hidden');
             document.getElementById('battle-arena').classList.remove('hidden');
             document.getElementById('battle-arena').classList.add('flex');
-            document.getElementById('drawer-header').style.display = 'none'; 
+            document.getElementById('drawer-header').style.display = 'none';
             document.getElementById('battle-loading').classList.remove('hidden');
 
             try {
@@ -1108,7 +1080,7 @@ checkBattleReady();
             // Preenche os 4 Botões de Ataque
             for(let i=0; i<4; i++) {
                 const btn = document.getElementById(`move-${i}`);
-                if(p.moves[i]) { btn.innerText = p.moves[i].name; btn.style.visibility = 'visible'; btn.style.backgroundColor = typeColors[p.moves[i].type]; } 
+                if(p.moves[i]) { btn.innerText = p.moves[i].name; btn.style.visibility = 'visible'; btn.style.backgroundColor = typeColors[p.moves[i].type]; }
                 else { btn.style.visibility = 'hidden'; }
             }
         }
@@ -1144,7 +1116,7 @@ checkBattleReady();
         async function useMove(i) {
             if(battleState.isOver) return;
             const p = battleState.playerTeam[battleState.activePlayerIdx]; const e = battleState.enemyTeam[0];
-            
+
             // Esconde os menus e ataca
             document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
 
@@ -1154,19 +1126,19 @@ checkBattleReady();
             // TURNO DO INIMIGO COM FALA INSTANTÂNEA
             logBattle(`O Deus foca a sua energia cósmica...`);
             const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
-            
+
             const taunt = getRandomQuote(e.name);
             await showSpeechBubble(taunt);
 
             await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
             if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
-            
+
             showMainMenu();
         }
 
         async function executeAttack(aObj, dObj, m, targetImgId, dSide, containerId) {
             logBattle(`${aObj.name.toUpperCase()} ataca com ${m.name.toUpperCase()}!`); await wait(600);
-            
+
             // Animação de Investida
             const atkImg = document.getElementById(dSide === 'enemy' ? 'arena-player-img' : 'arena-enemy-img');
             const lungeClass = dSide === 'enemy' ? 'anim-lunge-player' : 'anim-lunge-enemy';
@@ -1176,8 +1148,8 @@ checkBattleReady();
 
             // Animação de Impacto (Tremer, Flash Vermelho e Explosão Visual)
             spawnVFX(containerId, typeColors[m.type]);
-            const img = document.getElementById(targetImgId); 
-            img.classList.add('anim-shake', 'anim-damage'); 
+            const img = document.getElementById(targetImgId);
+            img.classList.add('anim-shake', 'anim-damage');
             setTimeout(() => img.classList.remove('anim-shake', 'anim-damage'), 500);
 
             // Cálculo Matemático c/ Golpes Críticos
@@ -1227,7 +1199,7 @@ checkBattleReady();
                 return `<div class="flex flex-col items-center p-1 rounded border border-slate-600 ${!alive?'bg-red-900/50':isCur?'bg-amber-600/50':'bg-slate-700 hover:bg-slate-600 cursor-pointer'}" ${alive&&!isCur?`onclick="performSwitch(${i}, ${isForced})"`:''}>
                         <img src="${pk.sprite}" class="w-8 h-8 sm:w-10 sm:h-10 pixelated-img"><div class="w-12 h-1 bg-slate-800 mt-1 rounded"><div class="h-full bg-green-500 rounded" style="width:${(pk.hpCurrent/pk.hpMax)*100}%"></div></div></div>`;
             }).join(''));
-            
+
             // Esconde o botão de voltar se a troca for obrigatória
             if(!isForced && battleState.playerTeam[battleState.activePlayerIdx].hpCurrent > 0) sc.innerHTML += `<div class="p-2 text-xs font-bold text-white cursor-pointer hover:text-red-400" onclick="showMainMenu()">Voltar</div>`;
             sc.classList.remove('hidden'); sc.classList.add('flex');
@@ -1235,26 +1207,26 @@ checkBattleReady();
 
         async function performSwitch(i, isForced) {
             battleState.activePlayerIdx = i; document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
-            logBattle(`Vai tentar a sorte com ${battleState.playerTeam[i].name.toUpperCase()}!`); 
-            updateArenaUI(); 
+            logBattle(`Vai tentar a sorte com ${battleState.playerTeam[i].name.toUpperCase()}!`);
+            updateArenaUI();
             triggerEntryAnimation('arena-player-img', 'anim-enter-player');
             await wait(1200);
-            
+
             // Lógica Corrigida: Se a troca foi forçada porque um morreu, é o SEU turno. Se foi voluntária, perdeu a vez e o inimigo ataca.
             if (isForced) {
                 showMainMenu();
             } else {
                 const e = battleState.enemyTeam[0]; const p = battleState.playerTeam[i];
-                
+
                 logBattle(`O Deus não perdoa a troca...`);
                 const eMove = e.moves[Math.floor(Math.random()*e.moves.length)];
-                
+
                 const taunt = getRandomQuote(e.name);
                 await showSpeechBubble(taunt);
 
                 await executeAttack(e, p, eMove, 'arena-player-img', 'player', 'player-img-container');
                 if(p.hpCurrent <= 0) { await handlePlayerFaint(); return; }
-                
+
                 showMainMenu();
             }
         }
@@ -1264,7 +1236,7 @@ checkBattleReady();
             document.getElementById('main-action-menu').classList.add('hidden'); document.getElementById('main-action-menu').classList.remove('grid');
             document.getElementById('moves-menu').classList.add('hidden'); document.getElementById('moves-menu').classList.remove('grid');
             document.getElementById('switch-controls').classList.add('hidden'); document.getElementById('switch-controls').classList.remove('flex');
-            
+
             const ec = document.getElementById('end-controls'); ec.classList.remove('hidden'); ec.classList.add('flex');
             if(isWin) { document.getElementById('btn-catch').classList.remove('hidden'); logBattle("Silêncio cósmico... Tens uma última chance de atirar a Ultra Ball!"); }
         }
@@ -1273,7 +1245,7 @@ checkBattleReady();
             document.getElementById('btn-catch').classList.add('hidden');
             logBattle("A Ultra Ball voa pelas trevas até ao alvo!"); await wait(2000);
             logBattle("Um... "); await wait(1000); logBattle("Um... Dois... "); await wait(1000);
-            if(Math.random() < 0.15) { logBattle(`Três! CLICK! O IMPOSSÍVEL ACONTECEU! CAPTURASTE O ${getDisplayName(currentLegendary).toUpperCase()}!`); } 
+            if(Math.random() < 0.15) { logBattle(`Três! CLICK! O IMPOSSÍVEL ACONTECEU! CAPTURASTE O ${getDisplayName(currentLegendary).toUpperCase()}!`); }
             else { logBattle("A BOLA EXPLODIU EM MIL PEDAÇOS! A Divindade ri-se e foge para o firmamento!"); }
         }
 
@@ -1298,7 +1270,7 @@ checkBattleReady();
         async function handleChatSubmit(e) {
             e.preventDefault(); const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
             i.value = ''; i.disabled = true;
-            
+
             const c = document.getElementById('chat-messages');
             c.insertAdjacentHTML('beforeend', `<div class="chat-bubble-user">${t}</div>`); c.scrollTop = c.scrollHeight;
 
@@ -1321,7 +1293,6 @@ checkBattleReady();
             currentChatHistory.push({ role: "user", parts: [{ text: t }] });
             const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: currentChatHistory };
             const lid = 'l-'+Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`); c.scrollTop = c.scrollHeight;
-            playCry(currentCries?.latest);
 
             try {
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, { method:'POST', headers: { 'Content-Type': 'application/json' }, body:JSON.stringify(p) });
