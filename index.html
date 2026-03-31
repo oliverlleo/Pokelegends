@@ -25,7 +25,7 @@
         #parallax-bg {
             position: fixed; top: -50px; left: -50px; right: -50px; bottom: -50px;
             z-index: -1; overflow: hidden; pointer-events: none; background-color: #020617;
-        }
+         transition: background-color 0.5s ease; }
         .layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; will-change: transform; transition: transform 0.3s ease-out; }
         .nebula { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; mix-blend-mode: screen; animation: pulse 10s infinite alternate ease-in-out; }
         .nebula-purple { background: rgba(88, 28, 135, 0.4); width: 60vw; height: 60vh; top: -10%; left: -10%; }
@@ -628,7 +628,17 @@
             "tapu-bulu": "O colosso de madeira cega e protetor insano de Ula'ula. Tapu Bulu é o destruidor de invasores, manipulando o terreno florido num campo minado letal com o poder maciço de raízes gigantes e cipós estranguladores. Extremamente passivo quando intocado, mas uma tempestade irada, brutal e impiedosa se o seu santuário rural for poluído. Usa as suas forças brutas para afundar opositores mesquinhos e reconstruir florestas colossais com uma pujança natural e incontrolável esmagadora.",
             "tapu-fini": "A deusa imaculada e purificadora de Poni. Senhora de misteriosas marés, nevoeiros fantasmagóricos celestiais e brumas santas densas e encantadoras. Tapu Fini defende ferozmente a ilha de corrupção, varrendo a escuridão alienígena através das suas águas curativas mágicas e cristalinas místicas, mas que escondem ilusões terríveis num oceano sombrio. Mergulha adversários malignos numa desorientação fúnebre fria antes de purificá-los totalmente de seus pecados trágicos na sua sabedoria divina e puríssima eterna.",
             "type-null": "Um trágico quimera cibernético amaldiçoado pelas mãos cruéis e frias dos humanos egoístas em Aether. Construído como o assassino híbrido artificial final para combater divindades alienígenas extradimensionais. Preso forçosamente numa pesada máscara esmagadora e supressora que bloqueia o seu imenso e letal potencial caótico de mudar a sua própria matéria, Type: Null ruge de dor silenciosa na prisão sombria da sua mente letal, esperando desesperadamente ser libertado pelas mãos corajosas de um herói solidário.",
-            "silvally": "A gloriosa evolução e libertação da quimera amaldiçoada! Ao quebrar a sua máscara supressora impiedosa pela ligação pura com o seu mestre humano heróico de coração amigável e destemido, Silvally revela a sua verdadeira forma radiante animal ágil indomável heroica letal impenetrável celestial e inabalável e formidável justiceira. Com as suas memórias táticas elementares formidáveis desbloqueadas na fúria brilhante sádica e sagrada, pode imitar a fúria suprema omnipotente letal para fatiar demónios dimensionais com golpes magistrais ferozes e precisão divina suprema cega e avassaladora"
+            "silvally": "A gloriosa evolução e libertação da quimera amaldiçoada! Ao quebrar a sua máscara supressora impiedosa pela ligação pura com o seu mestre humano heróico de coração amigável e destemido, Silvally revela a sua verdadeira forma radiante animal ágil indomável heroica letal impenetrável celestial e inabalável e formidável justiceira. Com as suas memórias táticas elementares formidáveis desbloqueadas na fúria brilhante sádica e sagrada, pode imitar a fúria suprema omnipotente letal para fatiar demónios dimensionais com golpes magistrais ferozes e precisão divina suprema cega e avassaladora",
+            "dragonite": "O titã gentil dos céus tempestuosos. Apesar da sua aparência serena e nobre, abriga uma força avassaladora capaz de destruir navios e montanhas num piscar de olhos caso o seu território ou companheiros sejam ameaçados por injustiças terríveis. As lendas contam que ele viaja por todo o globo terrestre em velocidade supersónica para guiar almas perdidas e embarcações naufragadas de volta à terra firme num rugido divino de compaixão e puro poder.",
+            "tyranitar": "A abominação destrutiva e inabalável que redefine a própria paisagem. Quando desperta do seu sono, um terremoto assustador oblitera a terra ao redor. Ignora ataques letais com o seu exterior de carapaça indestrutível, forjado sob a fúria das tempestades de areia mortais, esmagando os inimigos com um ódio impiedoso assustador e brutal.",
+            "salamence": "A fera carmesim colérica e letal sedenta por céus inatingíveis. O seu desejo desesperado cego por asas mutou as suas próprias células, rasgando as costas numa transformação dolorosa assombrosa. Agora ele espalha terror e chamas cruéis implacáveis sobre os tolos que ousam invadir a sua majestade cósmica avassaladora e sangrenta divina aérea.",
+            "metagross": "O supercomputador predador de quatro cérebros forjado no magnetismo do abismo cósmico. Com inteligência superior e cruel, devora presas imobilizadas após empalá-las sem qualquer misericórdia sob o seu peso metálico gigantesco divino brutal invencível num frio e puramente calculista esmagamento impenetrável letal.",
+            "garchomp": "O caçador voraz das fendas profundas das cavernas esquecidas e tempestades letais de areia insanas. A sua pele escamosa microscópica retalha os ventos para caçar à velocidade dos caças aéreos letais cortantes divinos brutais, não descansando até que o inimigo esteja devorado pelas suas mandíbulas afiadas insaciáveis assustadoras letais cegas esmagadoras.",
+            "hydreigon": "O destruidor aterrorizante profano de três cabeças devoradoras insanas. Cego ao medo, a sua agressividade implacável impiedosa esmagadora cruel destrói cidades inteiras como num dilúvio dracónico avassalador brutal letal divino assombroso letal impenetrável, não deixando absolutamente nada além de brasas ardentes coléricas sagradas nefastas amaldiçoadas.",
+            "goodra": "A realeza pegajosa das monções intermináveis abençoadas sagradas insanas. Disfarcando a sua pura força titânica impenetrável divina invencível letal esmagadora letal formidável aterradora com o seu abraço esmagador, derrete predadores temíveis e colossais num ácido viscoso brutal letal implacável sádico avassalador que queima as pedras sagradas das lendas divinas cortantes supremas.",
+            "kommo-o": "O guerreiro escamado dourado da montanha impiedosa inquebrável majestosa suprema. As suas escamas sonoras blindadas divinas letais absolutas são impenetráveis divinas invencíveis letais radiantes brutais avassaladoras blindadas gloriosas esmagadoras, usando cada impacto esmagador indomável divino sublime para aniquilar as vontades malignas numa dança colossal de devastação formidável insana letal sagrada perfeita gloriosa indestrutível divina majestosa divina pura formidável colossal letal majestosa assombrosa blindada.",
+            "dragapult": "O fantasma stealth caçador invencível aterrador dos mares do esquecimento jurássico antigo imortal eterno eterno espectral letal invisível aterrador impenetrável impiedoso cego sombrio. Ele lança as suas próprias crias numa fúria de bombardeio de velocidade supersónica brutal abissal assombrosa majestosa celestial suprema divina divina impiedosa avassaladora letal para vingar a sua extinção assustadora impiedosa sádica letal letal fria divina letal aterradora.",
+            "baxcalibur": "A espada primordial gelada indestrutível formidável letal assassina do zero absoluto letal implacável invencível divina eterna gélida sombria majestosa assombrosa impiedosa. A sua fúria titânica avassaladora letal esmagadora eterna purificadora insana letal sublime aterradora cega destrói geleiras numa avalanche letal de medo inquebrável divino glorioso supremo congelando o desespero e o terror purificando de vez as trevas profanas de fúria majestosa e sádica."
         };
 
         // FRASES DE BATALHA DE PERSONALIDADE
@@ -653,15 +663,30 @@
         };
 
         function getRandomQuote(pokeName) {
-            const defaultQuotes = [
+            const defaultLegendaryQuotes = [
                 "Não tens poder suficiente para me desafiar!",
                 "A minha força divina é absoluta e inquestionável!",
                 "Vais arrepender-te desta ousadia mortal patética.",
                 "Desaparece, criatura insignificante!",
                 "A tua pequena jornada termina aqui e agora perante mim!"
             ];
-            const quotes = battleQuotes[pokeName] || defaultQuotes;
-            return quotes[Math.floor(Math.random() * quotes.length)];
+            const defaultCommonQuotes = [
+                "Um Pokémon selvagem ataca ferozmente!",
+                "A criatura defende o seu território com tudo!",
+                "Uma batalha instintiva na natureza hostil começa!",
+                "O adversário revela a sua força natural bruta!",
+                "Este é um confronto de sobrevivência iminente!"
+            ];
+
+            if (battleQuotes[pokeName]) {
+                return battleQuotes[pokeName][Math.floor(Math.random() * battleQuotes[pokeName].length)];
+            }
+
+            if (legendariesList.includes(pokeName)) {
+                return defaultLegendaryQuotes[Math.floor(Math.random() * defaultLegendaryQuotes.length)];
+            } else {
+                return defaultCommonQuotes[Math.floor(Math.random() * defaultCommonQuotes.length)];
+            }
         }
 
         const hierarchyTiers = [
@@ -675,7 +700,8 @@
             { title: "Míticos e Desejos", pokemon: ["celebi", "jirachi", "deoxys-normal", "phione", "manaphy", "darkrai", "shaymin-land", "victini", "meloetta-aria", "diancie", "hoopa", "volcanion", "magearna", "marshadow"] },
             { title: "Ciência, Ilhas e Ilusões", pokemon: ["tapu-koko", "tapu-lele", "tapu-bulu", "tapu-fini", "type-null", "silvally", "genesect", "zeraora", "meltan", "melmetal"] },
             { title: "Espadachins e Lendas Rurais", pokemon: ["cobalion", "terrakion", "virizion", "keldeo-ordinary", "kubfu", "urshifu-single-strike", "glastrier", "spectrier", "calyrex", "zarude"] },
-            { title: "Tesouros e Falsos Heróis", pokemon: ["wo-chien", "chien-pao", "ting-lu", "chi-yu", "ogerpon", "okidogi", "munkidori", "fezandipiti", "pecharunt"] }
+            { title: "Tesouros e Falsos Heróis", pokemon: ["wo-chien", "chien-pao", "ting-lu", "chi-yu", "ogerpon", "okidogi", "munkidori", "fezandipiti", "pecharunt"] },
+            { title: "Os Falsos Deuses (Pseudo-Lendários)", pokemon: ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult", "baxcalibur"] }
         ];
 
         const typeColors = { normal:'#A8A77A', fire:'#EE8130', water:'#6390F0', electric:'#F7D02C', grass:'#7AC74C', ice:'#96D9D6', fighting:'#C22E28', poison:'#A33EA1', ground:'#E2BF65', flying:'#A98FF3', psychic:'#F95587', bug:'#A6B91A', rock:'#B6A136', ghost:'#735797', dragon:'#6F35FC', dark:'#705746', steel:'#B7B7CE', fairy:'#D685AD' };
@@ -734,11 +760,31 @@
         }
 
         async function init() {
+            document.getElementById('pyramid-area').addEventListener('scroll', function(e) {
+                const scrollArea = e.target;
+                const scrollPercent = scrollArea.scrollTop / (scrollArea.scrollHeight - scrollArea.clientHeight);
+                const titleEl = document.querySelector('h1.text-4xl');
+                const parallaxBg = document.getElementById('parallax-bg');
+
+                if (scrollPercent < 0.3) {
+                    titleEl.innerText = "A Hierarquia Divina";
+                    parallaxBg.style.backgroundColor = "#020617";
+                } else if (scrollPercent >= 0.3 && scrollPercent < 0.7) {
+                    titleEl.innerText = "Os Falsos Deuses";
+                    parallaxBg.style.backgroundColor = "#1e293b";
+                } else {
+                    titleEl.innerText = "O Reino Mortal";
+                    parallaxBg.style.backgroundColor = "#334155";
+                }
+            });
+
             legendariesList = [];
             hierarchyTiers.forEach(tier => {
                 tier.pokemon.forEach(p => legendariesList.push(p.split('-')[0]));
             });
             const container = document.getElementById('pyramid-content');
+
+            // Create Legendary / Pseudo Tiers
             hierarchyTiers.forEach(tier => {
                 const div = document.createElement('div'); div.className = 'w-full mb-8';
                 div.innerHTML = `<div class="tier-title title-font">${tier.title}</div><div class="tier-row" id="row-${tier.title.replace(/\s/g,'')}"></div>`;
@@ -756,8 +802,65 @@
                 });
             });
 
-            fetch('https://pokeapi.co/api/v2/pokemon?limit=1200').then(r=>r.json()).then(d => {
+            // Lazy Load Observer for Common Pokemon
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const pokeName = entry.target.dataset.name;
+                        const img = entry.target.querySelector('img');
+                        if (img && !img.src) {
+                            fetch(`https://pokeapi.co/api/v2/pokemon/${pokeName}`).then(r=>r.json()).then(d => {
+                                img.src = d.sprites.other['official-artwork'].front_default;
+                            }).catch(()=>{});
+                        }
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: "200px" });
+
+            // Fetch and Group Common Pokemon by Generation
+            fetch('https://pokeapi.co/api/v2/pokemon?limit=1025').then(r=>r.json()).then(d => {
                 globalPokedex = d.results.filter(p => !p.name.includes('-'));
+                const commons = d.results.filter(p => !legendariesList.includes(p.name) && !p.name.includes('-'));
+
+                const gens = [
+                    { title: "Os Mortais - Geração I", limit: 151 },
+                    { title: "Os Mortais - Geração II", limit: 251 },
+                    { title: "Os Mortais - Geração III", limit: 386 },
+                    { title: "Os Mortais - Geração IV", limit: 493 },
+                    { title: "Os Mortais - Geração V", limit: 649 },
+                    { title: "Os Mortais - Geração VI", limit: 721 },
+                    { title: "Os Mortais - Geração VII", limit: 809 },
+                    { title: "Os Mortais - Geração VIII", limit: 905 },
+                    { title: "Os Mortais - Geração IX", limit: 1025 }
+                ];
+
+                let commonIndex = 0;
+                let nextGenStart = 1;
+
+                gens.forEach(gen => {
+                    const div = document.createElement('div'); div.className = 'w-full mb-8 mt-12';
+                    const genId = gen.title.replace(/\s/g,'').replace(/-/g, '');
+                    div.innerHTML = `<div class="tier-title title-font text-2xl text-slate-300">${gen.title}</div><div class="tier-row" id="row-${genId}"></div>`;
+                    container.appendChild(div);
+                    const row = document.getElementById(`row-${genId}`);
+
+                    const pokesInGen = d.results.slice(nextGenStart - 1, gen.limit).filter(p => !legendariesList.includes(p.name) && !p.name.includes('-'));
+                    nextGenStart = gen.limit + 1;
+
+                    pokesInGen.forEach(c => {
+                        const poke = c.name;
+                        const node = document.createElement('div');
+                        node.className = 'poke-node';
+                        node.id = `node-${poke}`;
+                        node.dataset.name = poke;
+                        node.onclick = () => selectLegendary(poke);
+                        node.innerHTML = `<img id="img-${poke}" loading="lazy"><div class="tooltip">${getDisplayName(poke)}</div>`;
+                        row.appendChild(node);
+                        observer.observe(node);
+                    });
+                });
+
                 filterSearch(); // use our new filter logic
             });
 
@@ -836,15 +939,46 @@
                 }, 100);
                 // ---------------------------------
 
-                const pt = sD.flavor_text_entries.find(e => e.language.name === 'pt-BR');
-                if(pt) document.getElementById('detail-short-lore').innerText = `"${pt.flavor_text.replace(/\f|\n/g, ' ')}"`;
-                else {
-                    const en = sD.flavor_text_entries.find(e => e.language.name === 'en');
-                    if(en) {
-                        const tr = await translateToPortuguese(en.flavor_text.replace(/\f|\n/g, ' '));
-                        document.getElementById('detail-short-lore').innerText = `"${tr}"`;
+                // DYNAMIC LORE LOGIC
+                let combinedLore = "";
+                let shortLore = "";
+
+                const uniqueEntries = new Set();
+                const ptEntries = sD.flavor_text_entries.filter(e => e.language.name === 'pt-BR' || e.language.name === 'pt');
+                const enEntries = sD.flavor_text_entries.filter(e => e.language.name === 'en');
+
+                if (ptEntries.length > 0) {
+                    shortLore = ptEntries[0].flavor_text.replace(/\f|\n/g, ' ');
+                    ptEntries.forEach(e => {
+                        const clean = e.flavor_text.replace(/\f|\n/g, ' ');
+                        if(!uniqueEntries.has(clean)) { uniqueEntries.add(clean); combinedLore += clean + " "; }
+                    });
+                } else if (enEntries.length > 0) {
+                    const cleanFirst = enEntries[0].flavor_text.replace(/\f|\n/g, ' ');
+                    shortLore = await translateToPortuguese(cleanFirst);
+                    for (let i = 0; i < Math.min(enEntries.length, 3); i++) {
+                        const clean = enEntries[i].flavor_text.replace(/\f|\n/g, ' ');
+                        if(!uniqueEntries.has(clean)) {
+                            uniqueEntries.add(clean);
+                            const translated = await translateToPortuguese(clean);
+                            combinedLore += translated + " ";
+                        }
                     }
+                } else {
+                    shortLore = "Um ser envolto em mistério.";
+                    combinedLore = "Não existem registos suficientes na base de dados sobre os hábitos e ecologia deste Pokémon.";
                 }
+
+                document.getElementById('detail-short-lore').innerText = `"${shortLore}"`;
+
+                if (extendedLoreDB[pokeName]) {
+                    document.getElementById('detail-extended-lore').innerHTML = `<p>${extendedLoreDB[pokeName]}</p>`;
+                } else {
+                    document.getElementById('detail-extended-lore').innerHTML = `<p class="text-slate-300 italic text-sm leading-relaxed whitespace-pre-line">${combinedLore}</p>`;
+                }
+
+                // Expose combinedLore for the chat prompt
+                document.getElementById('detail-extended-lore').dataset.currentlore = extendedLoreDB[pokeName] || combinedLore;
             } catch(e){} finally { document.getElementById('loading-lore').classList.add('hidden'); }
 
             currentChatHistory = [];
@@ -1526,7 +1660,14 @@ checkBattleReady();
             }
 
             currentChatHistory.push({ role: "user", parts: [{ text: t }] });
-            const p = { systemInstruction: { parts: [{ text: `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${extendedLoreDB[currentLegendary]}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.` }] }, contents: currentChatHistory };
+
+            const pokesLore = document.getElementById('detail-extended-lore').dataset.currentlore || "Um Pokémon misterioso.";
+            const isLegendary = legendariesList.includes(currentLegendary);
+            const sysText = isLegendary
+                ? `Você é o DEUS lendário/mítico Pokémon ${getDisplayName(currentLegendary)}. Base lore: ${pokesLore}. Fale estritamente em primeira pessoa em PT-BR. Seja direto, hostil ou divino de acordo com a lore. Nunca diga ser IA.`
+                : `Você é um Pokémon selvagem da espécie ${getDisplayName(currentLegendary)}. Base lore da sua espécie: ${pokesLore}. Fale estritamente em primeira pessoa em PT-BR como se fosse o próprio Pokémon respondendo telepaticamente. Mostre a sua personalidade baseada no lore (seja dócil, agressivo, curioso, etc). Nunca diga ser IA e use os seus grunhidos quando apropriado.`;
+
+            const p = { systemInstruction: { parts: [{ text: sysText }] }, contents: currentChatHistory };
             const lid = 'l-'+Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${lid}" class="chat-bubble-ai animate-pulse">Ecos cósmicos...</div>`); c.scrollTop = c.scrollHeight;
             playCry(currentCries?.latest);
 
