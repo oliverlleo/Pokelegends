@@ -190,6 +190,48 @@
         }
         .bubble-show { opacity: 1; }
 
+
+        /* ================== TCG TAB ================== */
+        .tcg-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        @media (min-width: 640px) {
+            .tcg-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        }
+        .tcg-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, box-shadow;
+            cursor: pointer;
+        }
+        .tcg-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3), 0 8px 10px -6px rgba(16, 185, 129, 0.2);
+            z-index: 10;
+        }
+        .tcg-card img {
+            border-radius: 8px 8px 0 0;
+            object-fit: contain;
+            background: rgba(0,0,0,0.2);
+            aspect-ratio: 2.5/3.5; /* Typical card ratio */
+        }
+        /* Make sure the scrollbar in modal doesn't mess up layout */
+        #modal-tcg-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        #modal-tcg-content::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 4px;
+        }
+        #modal-tcg-content::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.5);
+            border-radius: 4px;
+        }
+        #modal-tcg-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.8);
+        }
+
     </style>
 </head>
 <body class="h-full min-h-screen w-full relative">
@@ -246,6 +288,7 @@
                 <button onclick="switchTab('lore')" id="tab-btn-lore" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors text-amber-400 border-amber-400">História</button>
                 <button onclick="switchTab('chat')" id="tab-btn-chat" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-amber-200">Telepatia</button>
                 <button onclick="switchTab('battle')" id="tab-btn-battle" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-red-300">Batalha</button>
+                <button onclick="switchTab('tcg')" id="tab-btn-tcg" class="flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 hover:text-emerald-300">TCG</button>
             </div>
         </div>
 
@@ -457,6 +500,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- ABA TCG -->
+        <div id="tab-tcg" class="tab-content flex-1 overflow-y-auto p-5 pb-32 space-y-6 bg-slate-900 hidden">
+            <div class="text-center mb-6">
+                <h3 class="text-emerald-400 text-lg md:text-xl font-bold uppercase tracking-widest title-font drop-shadow-md">Cartas Relacionadas</h3>
+                <p class="text-slate-400 text-sm font-light mt-1">Registos do TCG desta entidade</p>
+            </div>
+            <div id="tcg-loading" class="hidden flex-col items-center justify-center py-10">
+                <div class="spinner mb-4 w-8 h-8 border-2" style="border-right-color: #34d399;"></div>
+                <span class="text-emerald-400/80 text-sm">Pesquisando arquivos TCG...</span>
+            </div>
+            <div id="tcg-empty" class="hidden text-center text-slate-500 italic py-10">
+                Nenhuma carta encontrada nos arquivos sagrados.
+            </div>
+            <div id="tcg-grid" class="tcg-grid"></div>
+        </div>
+
     </aside>
 
     <script>
@@ -624,6 +684,8 @@
         const getMultiplier = (atkType, defTypes) => { let m = 1; defTypes.forEach(t => { if(typeMatrix[atkType] && typeMatrix[atkType][t] !== undefined) m *= typeMatrix[atkType][t]; }); return m; };
 
         let currentLegendary = null;
+        let currentDexNum = null;
+        const tcgState = { byPokemonId: {}, loading: {} };
         let currentCries = null;
         let currentChatHistory = [];
         let globalPokedex = []; 
@@ -693,6 +755,7 @@
 
                 async function selectLegendary(pokeName) {
             currentLegendary = pokeName;
+            currentDexNum = null;
             currentCries = null;
             document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('active'));
             document.getElementById(`node-${pokeName}`).classList.add('active');
@@ -742,8 +805,13 @@
                 let dexNum = "-";
                 if(sD.pokedex_numbers && sD.pokedex_numbers.length > 0) {
                     const natDex = sD.pokedex_numbers.find(d => d.pokedex.name === 'national');
-                    if(natDex) dexNum = `#${String(natDex.entry_number).padStart(3, '0')}`;
-                    else dexNum = `#${String(sD.pokedex_numbers[0].entry_number).padStart(3, '0')}`;
+                    if(natDex) {
+                        currentDexNum = natDex.entry_number;
+                        dexNum = `#${String(natDex.entry_number).padStart(3, '0')}`;
+                    } else {
+                        currentDexNum = sD.pokedex_numbers[0].entry_number;
+                        dexNum = `#${String(sD.pokedex_numbers[0].entry_number).padStart(3, '0')}`;
+                    }
                 }
 
                 document.getElementById('detail-region').innerText = regionName;
@@ -851,12 +919,33 @@
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
-            ['lore', 'chat', 'battle'].forEach(t => {
+
+            // Manage visibility for non-active tabs since flex-1 might still show them if not properly hidden.
+            // In the original they are hidden via .tab-content:not(.active) { display: none; } which is assumed to be in CSS.
+
+            ['lore', 'chat', 'battle', 'tcg'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
-                if(t === tab) btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors ${t==='battle'?'text-red-500 border-red-500':'text-amber-400 border-amber-400'}`;
-                else btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 ${t==='battle'?'hover:text-red-300':'hover:text-amber-200'}`;
+                if (!btn) return;
+
+                let activeColor = 'text-amber-400 border-amber-400';
+                let inactiveColor = 'hover:text-amber-200';
+                if (t === 'battle') {
+                    activeColor = 'text-red-500 border-red-500';
+                    inactiveColor = 'hover:text-red-300';
+                } else if (t === 'tcg') {
+                    activeColor = 'text-emerald-400 border-emerald-400';
+                    inactiveColor = 'hover:text-emerald-300';
+                }
+
+                if (t === tab) {
+                    btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800 border-b-2 transition-colors ${activeColor}`;
+                } else {
+                    btn.className = `flex-1 py-3 text-center font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg bg-slate-800/50 border-b-2 border-transparent transition-colors text-slate-400 ${inactiveColor}`;
+                }
             });
+
             if(tab === 'chat') document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+            if(tab === 'tcg') loadTCGCards();
         }
 
         function filterSearch() {
@@ -1450,6 +1539,219 @@ checkBattleReady();
         }
 
         init();
-    </script>
+
+        // ================== TCG TAB ==================
+        async function loadTCGCards() {
+            if (!currentDexNum) return;
+
+            const dex = currentDexNum;
+
+            if (tcgState.byPokemonId[dex]) {
+                renderTCGGrid(tcgState.byPokemonId[dex]);
+                return;
+            }
+
+            document.getElementById('tcg-loading').classList.remove('hidden');
+            document.getElementById('tcg-empty').classList.add('hidden');
+            document.getElementById('tcg-grid').innerHTML = '';
+
+            tcgState.loading[dex] = true;
+
+            const query = encodeURIComponent(`nationalPokedexNumbers:[${dex} TO ${dex}] supertype:Pokémon`);
+            const select = encodeURIComponent('id,name,images,rarity,artist,number,set,types,subtypes,hp,attacks,abilities,flavorText,nationalPokedexNumbers');
+            const url = `https://api.pokemontcg.io/v2/cards?q=${query}&pageSize=24&orderBy=-set.releaseDate&select=${select}`;
+
+            try {
+                const response = await fetch(url);
+                const json = await response.json();
+                const cards = json.data || [];
+
+                tcgState.byPokemonId[dex] = cards;
+                renderTCGGrid(cards);
+            } catch (err) {
+                console.error("Erro ao carregar cartas TCG:", err);
+                document.getElementById('tcg-empty').innerText = "Falha ao carregar os arquivos sagrados.";
+                document.getElementById('tcg-empty').classList.remove('hidden');
+            } finally {
+                tcgState.loading[dex] = false;
+                document.getElementById('tcg-loading').classList.add('hidden');
+            }
+        }
+
+        function renderTCGGrid(cards) {
+            const grid = document.getElementById('tcg-grid');
+
+            document.getElementById('tcg-loading').classList.add('hidden');
+
+            if (!cards || !cards.length) {
+                document.getElementById('tcg-empty').innerText = "Nenhuma carta encontrada nos arquivos sagrados.";
+                document.getElementById('tcg-empty').classList.remove('hidden');
+                grid.innerHTML = '';
+                return;
+            }
+
+            document.getElementById('tcg-empty').classList.add('hidden');
+
+            grid.innerHTML = cards.map(card => `
+                <button class="tcg-card bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-emerald-500/50 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-300 transform hover:-translate-y-1 flex flex-col group relative" onclick="openTCGCard('${card.id}')">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-60 z-10 pointer-events-none group-hover:opacity-40 transition-opacity"></div>
+                    <img src="${card.images?.small || ''}" alt="${card.name}" class="w-full object-cover p-2 pb-0">
+                    <div class="tcg-meta p-3 pt-2 text-left z-20 flex flex-col mt-auto bg-slate-900/90 w-full relative">
+                        <strong class="text-white text-sm font-bold truncate block group-hover:text-emerald-400 transition-colors">${card.name}</strong>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-xs text-slate-400 truncate max-w-[60%]">${card.set?.name || '-'}</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700">${card.rarity || 'Comum'}</span>
+                        </div>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function openTCGCard(cardId) {
+            const dex = currentDexNum;
+            const cards = tcgState.byPokemonId[dex] || [];
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+
+            document.getElementById('tcg-modal-img').src = card.images?.large || card.images?.small || '';
+            document.getElementById('tcg-modal-name').innerText = card.name;
+
+            document.getElementById('tcg-modal-set').innerText = card.set?.name || '-';
+            document.getElementById('tcg-modal-number').innerText = `${card.number} / ${card.set?.printedTotal || '?'}`;
+            document.getElementById('tcg-modal-rarity').innerText = card.rarity || 'Sem raridade';
+            document.getElementById('tcg-modal-artist').innerText = card.artist || 'Desconhecido';
+
+            const badgesContainer = document.getElementById('tcg-modal-badges');
+            badgesContainer.innerHTML = '';
+
+            // Subtypes
+            if (card.subtypes) {
+                card.subtypes.forEach(st => {
+                    badgesContainer.insertAdjacentHTML('beforeend', `<span class="px-2 py-1 bg-emerald-900/50 text-emerald-300 text-xs rounded-full border border-emerald-700/50 uppercase tracking-widest font-bold">${st}</span>`);
+                });
+            }
+
+            // HP
+            if (card.hp) {
+                badgesContainer.insertAdjacentHTML('beforeend', `<span class="px-2 py-1 bg-red-900/50 text-red-300 text-xs rounded-full border border-red-700/50 font-bold">HP ${card.hp}</span>`);
+            }
+
+            // Flavor Text
+            const flavorEl = document.getElementById('tcg-modal-flavor');
+            if (card.flavorText) {
+                flavorEl.innerText = `"${card.flavorText}"`;
+                flavorEl.classList.remove('hidden');
+            } else {
+                flavorEl.classList.add('hidden');
+                flavorEl.innerText = "";
+            }
+
+            // Abilities & Attacks
+            const abilitiesAttacksEl = document.getElementById('tcg-modal-abilities-attacks');
+            let aaHtml = '';
+
+            if (card.abilities) {
+                card.abilities.forEach(ab => {
+                    aaHtml += `
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-blue-900/50 shadow-inner">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded uppercase tracking-wider">${ab.type}</span>
+                            <span class="text-blue-400 font-bold text-sm md:text-base">${ab.name}</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">${ab.text}</p>
+                    </div>`;
+                });
+            }
+
+            if (card.attacks) {
+                card.attacks.forEach(atk => {
+                    aaHtml += `
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-red-900/50 shadow-inner">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-red-400 font-bold text-sm md:text-base flex items-center gap-2">
+                                ${atk.name}
+                            </span>
+                            ${atk.damage ? `<span class="text-white font-black text-lg bg-slate-900 px-2 rounded border border-slate-700">${atk.damage}</span>` : ''}
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">${atk.text || ''}</p>
+                    </div>`;
+                });
+            }
+
+            abilitiesAttacksEl.innerHTML = aaHtml;
+
+            const modal = document.getElementById('modal-tcg');
+            const modalContent = document.getElementById('modal-tcg-content');
+
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        function closeTCGModal() {
+            const modal = document.getElementById('modal-tcg');
+            const modalContent = document.getElementById('modal-tcg-content');
+
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+
+</script>
+
+    <!-- MODAL TCG DETALHES -->
+    <div id="modal-tcg" class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closeTCGModal()"></div>
+        <div class="relative bg-slate-900 rounded-2xl border border-emerald-900/50 shadow-[0_0_50px_rgba(16,185,129,0.15)] flex flex-col md:flex-row max-w-4xl w-full max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300 ease-out z-10" id="modal-tcg-content">
+
+            <button onclick="closeTCGModal()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-500 text-white rounded-full p-2 transition-all duration-200 z-50 focus:outline-none border border-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- Card Image Column -->
+            <div class="w-full md:w-1/2 p-6 flex items-center justify-center bg-slate-950/50 relative">
+                <div class="absolute inset-0 bg-emerald-500/5 blur-[100px]"></div>
+                <img id="tcg-modal-img" src="" class="max-h-[50vh] md:max-h-[75vh] object-contain relative z-10 drop-shadow-2xl rounded-xl transition-transform duration-500 hover:scale-105">
+            </div>
+
+            <!-- Card Details Column -->
+            <div class="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto space-y-6 flex flex-col">
+                <div>
+                    <h2 id="tcg-modal-name" class="text-3xl font-bold text-white title-font drop-shadow-lg">Nome</h2>
+                    <div class="flex flex-wrap gap-2 mt-2" id="tcg-modal-badges">
+                        <!-- Badges injected here -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <span class="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Set</span>
+                        <span id="tcg-modal-set" class="text-sm text-slate-300 font-medium">-</span>
+                    </div>
+                    <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <span class="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Número</span>
+                        <span id="tcg-modal-number" class="text-sm text-slate-300 font-medium">-</span>
+                    </div>
+                    <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <span class="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Raridade</span>
+                        <span id="tcg-modal-rarity" class="text-sm text-slate-300 font-medium">-</span>
+                    </div>
+                    <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <span class="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Artista</span>
+                        <span id="tcg-modal-artist" class="text-sm text-slate-300 font-medium">-</span>
+                    </div>
+                </div>
+
+                <div id="tcg-modal-flavor" class="hidden bg-slate-800/30 p-4 rounded-xl border-l-2 border-emerald-500/50 italic text-slate-400 text-sm leading-relaxed">
+                    <!-- Flavor text injected here -->
+                </div>
+
+                <div id="tcg-modal-abilities-attacks" class="space-y-4">
+                    <!-- Attacks/Abilities injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
